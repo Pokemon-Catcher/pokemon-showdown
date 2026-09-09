@@ -1,6 +1,6 @@
 {
     "venusaur": {
-        "level": 81,
+        "level": 80,
         "sets": [
             {
                 "role": "Staller",
@@ -205,7 +205,7 @@
         ]
     },
     "nidoking": {
-        "level": 82,
+        "level": 81,
         "sets": [
             {
                 "role": "Fast Attacker",
@@ -590,7 +590,7 @@
         ]
     },
     "gengar": {
-        "level": 74,
+        "level": 73,
         "sets": [
             {
                 "role": "Fast Attacker",
@@ -769,7 +769,7 @@
         ]
     },
     "kangaskhan": {
-        "level": 79,
+        "level": 80,
         "sets": [
             {
                 "role": "Fast Attacker",
@@ -805,7 +805,7 @@
         ]
     },
     "mrmime": {
-        "level": 83,
+        "level": 84,
         "sets": [
             {
                 "role": "Setup Sweeper",
@@ -1038,7 +1038,7 @@
         ]
     },
     "articuno": {
-        "level": 80,
+        "level": 79,
         "sets": [
             {
                 "role": "Staller",
@@ -1047,7 +1047,7 @@
             },
             {
                 "role": "Bulky Attacker",
-                "movepool": ["hiddenpowerfire", "icebeam", "rest", "sleeptalk"],
+                "movepool": ["icebeam", "rest", "sleeptalk", "toxic"],
                 "abilities": ["Pressure"]
             }
         ]
@@ -1200,7 +1200,7 @@
         ]
     },
     "noctowl": {
-        "level": 93,
+        "level": 94,
         "sets": [
             {
                 "role": "Staller",
@@ -1271,7 +1271,7 @@
         ]
     },
     "xatu": {
-        "level": 84,
+        "level": 85,
         "sets": [
             {
                 "role": "Setup Sweeper",
@@ -1316,9 +1316,18 @@
         "sets": [
             {
                 "role": "Wallbreaker",
-                "movepool": ["brickbreak", "doubleedge", "hiddenpowerghost", "hydropump", "rest", "return", "sleeptalk"],
-                "abilities": ["Huge Power"],
-                "preferredTypes": ["Normal"]
+                "movepool": ["brickbreak", "doubleedge", "hiddenpowerghost", "hydropump", "return"],
+                "abilities": ["Huge Power"]
+            },
+            {
+                "role": "Bulky Attacker",
+                "movepool": ["bodyslam", "focuspunch", "hiddenpowerghost", "return", "substitute"],
+                "abilities": ["Huge Power"]
+            },
+            {
+                "role": "Bulky Support",
+                "movepool": ["bodyslam", "hydropump", "rest", "return", "sleeptalk"],
+                "abilities": ["Huge Power"]
             }
         ]
     },
@@ -1360,7 +1369,7 @@
         ]
     },
     "jumpluff": {
-        "level": 87,
+        "level": 88,
         "sets": [
             {
                 "role": "Generalist",
@@ -1411,7 +1420,7 @@
         ]
     },
     "yanma": {
-        "level": 92,
+        "level": 93,
         "sets": [
             {
                 "role": "Berry Sweeper",
@@ -1543,7 +1552,7 @@
         ]
     },
     "girafarig": {
-        "level": 85,
+        "level": 86,
         "sets": [
             {
                 "role": "Setup Sweeper",
@@ -1783,7 +1792,7 @@
         ]
     },
     "mantine": {
-        "level": 86,
+        "level": 87,
         "sets": [
             {
                 "role": "Bulky Support",
@@ -1803,7 +1812,7 @@
         ]
     },
     "skarmory": {
-        "level": 73,
+        "level": 71,
         "sets": [
             {
                 "role": "Bulky Support",
@@ -1890,7 +1899,7 @@
         ]
     },
     "hitmontop": {
-        "level": 86,
+        "level": 87,
         "sets": [
             {
                 "role": "Fast Attacker",
@@ -1911,7 +1920,7 @@
         ]
     },
     "blissey": {
-        "level": 76,
+        "level": 75,
         "sets": [
             {
                 "role": "Staller",
@@ -1926,7 +1935,7 @@
         ]
     },
     "raikou": {
-        "level": 74,
+        "level": 73,
         "sets": [
             {
                 "role": "Setup Sweeper",
@@ -1942,7 +1951,7 @@
         ]
     },
     "entei": {
-        "level": 78,
+        "level": 77,
         "sets": [
             {
                 "role": "Bulky Support",
@@ -2262,7 +2271,7 @@
         ]
     },
     "ninjask": {
-        "level": 83,
+        "level": 84,
         "sets": [
             {
                 "role": "Fast Attacker",
@@ -2472,7 +2481,7 @@
         ]
     },
     "volbeat": {
-        "level": 94,
+        "level": 93,
         "sets": [
             {
                 "role": "Bulky Support",
@@ -2551,8 +2560,8 @@
         "level": 89,
         "sets": [
             {
-                "role": "Wallbreaker",
-                "movepool": ["earthquake", "explosion", "fireblast", "rest", "rockslide", "sleeptalk", "toxic"],
+                "role": "Bulky Attacker",
+                "movepool": ["earthquake", "explosion", "fireblast", "rest", "sleeptalk", "toxic"],
                 "abilities": ["Magma Armor"]
             }
         ]
@@ -2762,7 +2771,7 @@
         ]
     },
     "milotic": {
-        "level": 77,
+        "level": 76,
         "sets": [
             {
                 "role": "Staller",
@@ -3083,7 +3092,7 @@
         ]
     },
     "jirachi": {
-        "level": 73,
+        "level": 72,
         "sets": [
             {
                 "role": "Bulky Support",

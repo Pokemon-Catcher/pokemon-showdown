@@ -593,7 +593,7 @@
         ]
     },
     "electrode": {
-        "level": 92,
+        "level": 93,
         "sets": [
             {
                 "role": "Fast Support",
@@ -912,6 +912,12 @@
                 "movepool": ["Alluring Voice", "Calm Mind", "Shadow Ball", "Thunderbolt", "Volt Switch"],
                 "abilities": ["Volt Absorb"],
                 "teraTypes": ["Electric", "Fairy"]
+            },
+            {
+                "role": "Fast Support",
+                "movepool": ["Alluring Voice", "Calm Mind", "Thunderbolt", "Volt Switch"],
+                "abilities": ["Volt Absorb"],
+                "teraTypes": ["Electric", "Fairy", "Flying"]
             },
             {
                 "role": "Tera Blast user",
@@ -1692,6 +1698,23 @@
             }
         ]
     },
+    "stantler": {
+        "level": 90,
+        "sets": [
+            {
+                "role": "Bulky Attacker",
+                "movepool": ["Body Slam", "Earthquake", "Throat Chop", "Thunder Wave"],
+                "abilities": ["Intimidate"],
+                "teraTypes": ["Fairy", "Ghost", "Ground", "Poison"]
+            },
+            {
+                "role": "Tera Blast user",
+                "movepool": ["Calm Mind", "Earth Power", "Shadow Ball", "Tera Blast"],
+                "abilities": ["Intimidate"],
+                "teraTypes": ["Fairy"]
+            }
+        ]
+    },
     "smeargle": {
         "level": 95,
         "sets": [
@@ -1749,7 +1772,7 @@
         ]
     },
     "raikou": {
-        "level": 81,
+        "level": 82,
         "sets": [
             {
                 "role": "Bulky Setup",
@@ -1762,6 +1785,12 @@
                 "movepool": ["Calm Mind", "Scald", "Shadow Ball", "Thunderbolt", "Volt Switch"],
                 "abilities": ["Pressure"],
                 "teraTypes": ["Electric", "Water"]
+            },
+            {
+                "role": "Fast Support",
+                "movepool": ["Calm Mind", "Scald", "Thunderbolt", "Volt Switch"],
+                "abilities": ["Pressure"],
+                "teraTypes": ["Electric", "Flying", "Water"]
             }
         ]
     },
@@ -2060,7 +2089,7 @@
         ]
     },
     "sableye": {
-        "level": 88,
+        "level": 87,
         "sets": [
             {
                 "role": "Bulky Support",
@@ -3057,7 +3086,7 @@
         ]
     },
     "magnezone": {
-        "level": 85,
+        "level": 84,
         "sets": [
             {
                 "role": "Fast Attacker",
@@ -3103,7 +3132,7 @@
                 "role": "Fast Attacker",
                 "movepool": ["Earthquake", "Flamethrower", "Ice Punch", "Knock Off", "Supercell Slam", "Volt Switch"],
                 "abilities": ["Motor Drive"],
-                "teraTypes": ["Dark", "Flying", "Ground", "Ice"]
+                "teraTypes": ["Dark", "Flying", "Ground"]
             },
             {
                 "role": "Setup Sweeper",
@@ -3840,7 +3869,7 @@
         ]
     },
     "arceuspsychic": {
-        "level": 69,
+        "level": 70,
         "sets": [
             {
                 "role": "Bulky Setup",
@@ -4329,7 +4358,7 @@
         ]
     },
     "haxorus": {
-        "level": 77,
+        "level": 78,
         "sets": [
             {
                 "role": "Setup Sweeper",
@@ -5059,7 +5088,7 @@
         ]
     },
     "avalugghisui": {
-        "level": 90,
+        "level": 91,
         "sets": [
             {
                 "role": "Bulky Attacker",
@@ -5524,7 +5553,7 @@
         ]
     },
     "komala": {
-        "level": 88,
+        "level": 87,
         "sets": [
             {
                 "role": "Bulky Support",
@@ -5563,7 +5592,7 @@
         ]
     },
     "kommoo": {
-        "level": 78,
+        "level": 77,
         "sets": [
             {
                 "role": "Fast Bulky Setup",
@@ -6498,7 +6527,7 @@
         ]
     },
     "oinkolognef": {
-        "level": 92,
+        "level": 91,
         "sets": [
             {
                 "role": "Bulky Setup",
@@ -6919,7 +6948,7 @@
         ]
     },
     "cyclizar": {
-        "level": 83,
+        "level": 84,
         "sets": [
             {
                 "role": "Fast Support",
@@ -7648,7 +7677,7 @@
         ]
     },
     "archaludon": {
-        "level": 78,
+        "level": 77,
         "sets": [
             {
                 "role": "Bulky Setup",
