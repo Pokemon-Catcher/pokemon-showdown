@@ -1,0 +1,3 @@
+[submodule "fusionmons"]
+	path = fusionmons
+	url = https://github.com/Pokemon-Catcher/fusiomons.git
