@@ -112,38 +112,38 @@ export const FusionScript = {
 					`<b>${"" + apparentPokemon.name + " + " + Dex.species.get(apparentPokemon2.id).name + " base stats:"}</b>`,
 				);
 				if (apparentPokemon2.exists) {
-					if (apparentPokemon.num < 722 && apparentPokemon2.num < 722) {
-						let num1 = apparentPokemon.num;
-						let num2 = apparentPokemon2.num;
-						num1 +=
-							(num1 > 386 ? 4 : 0) +
-							(num1 > 668 ? 1 : 0) +
-							(num1 > 669 ? 4 : 0) +
-							(num1 > 670 ? 4 : 0) +
-							(num1 > 671 ? 4 : 0) +
-							(num1 > 678 ? 1 : 0) +
-							(num1 > 681 ? 1 : 0) +
-							(num1 > 709 ? 1 : 0) +
-							(num1 > 718 ? 2 : 0) +
-							(num1 > 719 ? 1 : 0) +
-							(num1 > 720 ? 1 : 0);
-						num2 +=
-							(num2 > 386 ? 4 : 0) +
-							(num2 > 668 ? 1 : 0) +
-							(num2 > 669 ? 4 : 0) +
-							(num2 > 670 ? 4 : 0) +
-							(num2 > 671 ? 4 : 0) +
-							(num2 > 678 ? 1 : 0) +
-							(num2 > 681 ? 1 : 0) +
-							(num2 > 709 ? 1 : 0) +
-							(num2 > 718 ? 2 : 0) +
-							(num2 > 719 ? 1 : 0) +
-							(num2 > 720 ? 1 : 0);
-						pokemon.battle.add(
-							"html",
-							`<details><summary>Спрайт</summary><p><img src="https://japeal.com/wordpress/wp-content/themes/total/PKM/upload2/${num1}X${num2}X0.png"></p></details>`,
-						);
-					}
+					// if (apparentPokemon.num < 722 && apparentPokemon2.num < 722) {
+					// 	let num1 = apparentPokemon.num;
+					// 	let num2 = apparentPokemon2.num;
+					// 	num1 +=
+					// 		(num1 > 386 ? 4 : 0) +
+					// 		(num1 > 668 ? 1 : 0) +
+					// 		(num1 > 669 ? 4 : 0) +
+					// 		(num1 > 670 ? 4 : 0) +
+					// 		(num1 > 671 ? 4 : 0) +
+					// 		(num1 > 678 ? 1 : 0) +
+					// 		(num1 > 681 ? 1 : 0) +
+					// 		(num1 > 709 ? 1 : 0) +
+					// 		(num1 > 718 ? 2 : 0) +
+					// 		(num1 > 719 ? 1 : 0) +
+					// 		(num1 > 720 ? 1 : 0);
+					// 	num2 +=
+					// 		(num2 > 386 ? 4 : 0) +
+					// 		(num2 > 668 ? 1 : 0) +
+					// 		(num2 > 669 ? 4 : 0) +
+					// 		(num2 > 670 ? 4 : 0) +
+					// 		(num2 > 671 ? 4 : 0) +
+					// 		(num2 > 678 ? 1 : 0) +
+					// 		(num2 > 681 ? 1 : 0) +
+					// 		(num2 > 709 ? 1 : 0) +
+					// 		(num2 > 718 ? 2 : 0) +
+					// 		(num2 > 719 ? 1 : 0) +
+					// 		(num2 > 720 ? 1 : 0);
+					// 	pokemon.battle.add(
+					// 		"html",
+					// 		`<details><summary>Спрайт</summary><p><img src="https://japeal.com/wordpress/wp-content/themes/total/PKM/upload2/${num1}X${num2}X0.png"></p></details>`,
+					// 	);
+					// }
 					let baseStatsFusion = this.fuseStatsCalculate(
 						apparentPokemon,
 						apparentPokemon2,
