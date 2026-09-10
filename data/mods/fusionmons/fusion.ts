@@ -6,8 +6,8 @@ export const FusionScript = {
 	fuse: function (template: Species, pokemon: Pokemon) {
 		//Setup
 		let name = pokemon.species.name;
-		let template1 = Dex.species.get(template.name); //First Pokemon
-		let template2 = Dex.species.get(template.name); //Second  Pokemon
+		let template1 = Dex.species.get(template.baseSpecies); //First Pokemon
+		let template2 = Dex.species.get(template.baseSpecies); //Second  Pokemon
 
 		//Extract second pokemon from name of first pokemon
 		if (pokemon.name) {
@@ -15,7 +15,7 @@ export const FusionScript = {
 			template2 = Dex.species.get(name);
 			if (!template2.exists) {
 				name = pokemon.species.name;
-				template2 = Dex.species.get(template.name);
+				template2 = Dex.species.get(template.baseSpecies);
 			}
 		}
 
@@ -57,7 +57,8 @@ export const FusionScript = {
 
 		//Delete second type if they're equal
 		if (new_types[0] === new_types[1]) new_types.pop();
-
+		new_types = new_types.filter((t) => t !== undefined);
+		if (new_types.length === 0) new_types = [template1.types[0] || "Normal"];
 		let templateResult = template1; //Result template
 		pokemon.removeVolatile("hybride");
 		//Assigning stats, weight, types to result template
@@ -76,6 +77,7 @@ export const FusionScript = {
 			});
 			pokemon.hp = new_stats["hp"] - (pokemon.maxhp - pokemon.hp);
 			pokemon.maxhp = new_stats["hp"];
+			pokemon.baseMaxhp = new_stats.hp
 		}
 		return templateResult;
 	},
@@ -174,7 +176,7 @@ export const FusionScript = {
 		);
 		pokemon.hp = newHp - (pokemon.maxhp - pokemon.hp);
 		pokemon.maxhp = newHp;
-		pokemon.types = types;
+		pokemon.setType(types.filter(Boolean), true);
 		this.info(pokemon, template2, undefined, types);
 	},
 
@@ -192,8 +194,8 @@ export const FusionScript = {
 		for (let stat in template1.baseStats) {
 			stats[stat as StatID] = Math.floor(
 				Math.max(BST1, BST2) *
-					((template1.baseStats[stat as StatID] / BST2 +
-						template2.baseStats[stat as StatID] / BST1) /
+					((template1.baseStats[stat as StatID] / BST1 +
+						template2.baseStats[stat as StatID] / BST2) /
 						2),
 			);
 		}
@@ -269,8 +271,11 @@ export const FusionScript = {
 	},
 
 	fuseTypes: function (types1: string[], types2: string[]) {
-		let types = [types1[0], types2[1] ? types2[1] : types2[0]];
-		if (types[0] == types[1]) types.pop();
+		let types = [types1[0], types2[1] ? types2[1] : types2[0]].filter(
+			Boolean,
+		);
+		if (types[0] === types[1]) types.pop();
+		if (types.length === 0) types = [types1[0] || "Normal"];
 		return types;
 	},
 };

@@ -1,6 +1,7 @@
 import { PRNG } from "../../../sim/prng";
 import { FusionScript } from "../../mods/fusionmons/fusion";
 import RandomTeams from "../gen9/teams";
+import { toID } from "../../../sim/dex";
 
 // Moves that restore HP:
 const RECOVERY_MOVES = [
@@ -237,11 +238,62 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 		set2: RandomTeamsTypes.RandomSet,
 	) {
 		set.ability = this.random() > 0.5 ? set.ability : set2.ability;
-		for (let i in set.moves) {
-			set.moves[i] = this.random() > 0.5 ? set.moves[i] : set2.moves[i];
+		const learnset = FusionScript.fuseLearnsets(
+			Dex.species.get(set.species),
+			Dex.species.get(set2.species),
+		);
+		const moveset = new Set(
+			[...set.moves, ...set2.moves].filter((m: string) =>
+				learnset.has(toID(m)),
+			),
+		);
+		let length = [...moveset].length;
+		if (length <= 4) {
+			set.moves = [...moveset];
+			if (length < 4) {
+				const d = learnset.difference(moveset);
+				const sets1: RandomTeamsTypes.RandomSetData[] =
+					this[`randomSets`][set.speciesId ?? ""]["sets"] ?? [];
+				const sets2: RandomTeamsTypes.RandomSetData[] =
+					this[`randomSets`][set2.speciesId ?? ""]["sets"] ?? [];
+				let usefulMoves = new Set<ID>();
+				for (let s of sets1) {
+					for (const m of s.movepool) {
+						usefulMoves.add(toID(m));
+					}
+				}
+				for (let s of sets2) {
+					for (const m of s.movepool) {
+						usefulMoves.add(toID(m));
+					}
+				}
+				const usefulLearnset = d.intersection<ID>(usefulMoves);
+				let arr = [...d];
+				let arr2 = [...usefulLearnset];
+				for (let i = 0; i < 4 - set.moves.length && arr2.length > 0; i++) {
+					let move = arr2[this.random(0, arr2.length)];
+					set.moves.push(move);
+					d.delete(move);
+					arr2 = [...usefulLearnset];
+				}
+				for (let i = 0; i < 4 - set.moves.length && arr.length > 0; i++) {
+					let move = arr[this.random(0, arr.length)];
+					set.moves.push(move);
+					d.delete(move);
+					arr = [...d];
+				}
+			}
+		} else {
+			for (let i = 0; i < 4; i++) {
+				set.moves[i] = [...moveset][this.random(0, length)];
+				moveset.delete(set.moves[i]);
+				length--;
+			}
 		}
+
 		set.item = this.random() > 0.5 ? set.item : set2.item;
 		set.name = `+${set2.species}`;
+		set.level = Math.min(set.level,set2.level)
 		return set;
 	}
 	override randomTeam() {
@@ -534,7 +586,10 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 			}
 			if (
 				set.role === "Tera Blast user" ||
-				["ogerpon", "ogerponhearthflame", "terapagos"].includes(species.id)||["ogerpon", "ogerponhearthflame", "terapagos"].includes(species2.id)
+				["ogerpon", "ogerponhearthflame", "terapagos"].includes(
+					species.id,
+				) ||
+				["ogerpon", "ogerponhearthflame", "terapagos"].includes(species2.id)
 			) {
 				teamDetails.teraBlast = 1;
 			}

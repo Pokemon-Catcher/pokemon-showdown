@@ -9,8 +9,8 @@ export const Rulesets: ModdedFormatDataTable = {
 		name: "fusionlearnsets",
 		ruleset: ["EV Limit = 510", "Obtainable Misc", "Max Level = 100"],
 		onValidateSet(set, _format, setHas, _teamHas) {
-			const species = this.dex.species.get(set.species);
-			const species2 = Dex.species.get(set.name.substring(1));
+			const species = this.dex.species.get(this.dex.species.get(set.species).baseSpecies);
+			const species2 = this.dex.species.get(Dex.species.get(set.name.substring(1)).baseSpecies);
 			// Any item that was legal in Gen 7 (Normal Gem for example) should be usable
 			let item = this.dex.items.get(set.item);
 			let gen = this.dex.gen;
@@ -26,7 +26,7 @@ export const Rulesets: ModdedFormatDataTable = {
 
 			let moveLegalityWhitelist: { [k: string]: true } = {};
 			let fusedLearnset = FusionScript.fuseLearnsets(species, species2);
-			for (let m in fusedLearnset) {
+			for (let m of fusedLearnset) {
 				moveLegalityWhitelist[m] = true;
 			}
 			let problems: string[] = this.validateMoves(
@@ -37,10 +37,8 @@ export const Rulesets: ModdedFormatDataTable = {
 				species.name,
 				moveLegalityWhitelist,
 			);
-			console.log(this.ruleTable.evLimit)
-			problems.push(
-					...this.validateStats(set, species, setSources, null),
-				);
+			console.log(moveLegalityWhitelist);
+			problems.push(...this.validateStats(set, species, setSources, null));
 
 			const ability = Dex.abilities.get(set.ability);
 
@@ -113,17 +111,26 @@ export const Rulesets: ModdedFormatDataTable = {
 		effectType: "Rule",
 		name: "Fusion",
 		onSwitchIn: function (pokemon) {
+			if (pokemon.terastallized) {
+				return;
+			}
+
 			if (pokemon.name) {
 				let name = pokemon.name.substring(1, 20);
-				let template = Dex.species.get(pokemon.species.id);
+				let template = Dex.species.get(pokemon.species.baseSpecies);
 				let template2 = Dex.species.get(pokemon.name.substring(1));
 				if (!template2.exists) {
 					name = pokemon.species.name;
-					template2 = pokemon.species;
+					template2 = pokemon.baseSpecies;
 				}
-				let new_types = [template.types[0], template.types[1]];
+				if (!template.exists) {
+					template = pokemon.baseSpecies;
+				}
+				let new_types;
+
+				new_types = [template.types[0], template.types[1]];
 				if (
-					Dex.species.getByID(template2.id).types != pokemon.types &&
+					Dex.species.get(template2.baseSpecies).types != pokemon.types &&
 					!pokemon.transformed
 				) {
 					if (template2.types[1] != undefined)
@@ -131,9 +138,10 @@ export const Rulesets: ModdedFormatDataTable = {
 					else new_types = [template.types[0], template2.types[0]];
 				}
 				if (new_types[0] == new_types[1]) new_types.pop();
-
-				pokemon.types = [new_types[0]];
-				if (new_types[1]) pokemon.types.push(new_types[1]);
+				new_types = new_types.filter((t) => t !== undefined);
+				if (new_types.length === 0)
+					new_types = [template.types[0] || "Normal"];
+				pokemon.setType(new_types.filter(Boolean), true);
 
 				//Zoroark Illusion
 				let apparentPokemon;
@@ -198,6 +206,7 @@ export const Rulesets: ModdedFormatDataTable = {
 				);
 			}
 		},
+		onSwitchInPriority: 100,
 	},
 	teampreview: {
 		effectType: "Rule",

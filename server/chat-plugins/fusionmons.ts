@@ -53,8 +53,6 @@ export const commands: Chat.ChatCommands = {
 		this.sendReply(`|raw|` + buffer);
 	},
 	fl: function (target, room, user, connection, cmd) {
-		if (!this.runBroadcast()) return;
-
 		let buffer = ``;
 		let colorTable: { [key: string]: string } = {
 			"???": `#1bc4a8`,
