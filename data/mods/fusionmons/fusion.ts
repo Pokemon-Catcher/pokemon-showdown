@@ -260,7 +260,7 @@ export const FusionScript = {
 			if (
 				(factor1 <= 0 && factor2 <= 0) || // ни ход не SE к добавленному типу, ни добавленный тип не SE к ходу
 				types.includes(move.type) || // тип хода и так входит в итоговый фьюжн-тайпинг
-				template2Learnset.has(i as ID) || // второй родитель тоже учит этот ход
+				template1Learnset.has(i as ID) || // второй родитель тоже учит этот ход
 				(template1.types[0] == types[0] && template1.types[1] == types[1]) // фьюжн сохранил тайпинг первого родителя целиком
 			)
 				//if types of fuse is the same as the pokemon2 types
