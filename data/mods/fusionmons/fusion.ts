@@ -77,7 +77,7 @@ export const FusionScript = {
 			});
 			pokemon.hp = new_stats["hp"] - (pokemon.maxhp - pokemon.hp);
 			pokemon.maxhp = new_stats["hp"];
-			pokemon.baseMaxhp = new_stats.hp
+			pokemon.baseMaxhp = new_stats.hp;
 		}
 		return templateResult;
 	},
@@ -208,65 +208,62 @@ export const FusionScript = {
 		let template1Learnset = Dex.species.getMovePool(template1.id, true);
 		let template2Learnset = Dex.species.getMovePool(template2.id, true);
 
-		// for(let i in movedex){
-		// 	let result = TeamValidator.get('fusionmons').checkLearnset(i, template1.species);
-		// 	if(!result || result['type']!='invalid')
-		// 		template1Learnset[i]=true;
-		// 	result = TeamValidator.get('fusionmons').checkLearnset(i, template2.species);
-		// 	if(!result || result['type']!='invalid')
-		// 		template2Learnset[i]=true;
-		// }
-
 		if (template1.id == template2.id) return template1Learnset;
 
 		let types = this.fuseTypes(template1.types, template2.types);
+
+		// тип, с которым сравниваем ходы первого родителя — "добавленный" тип фьюжна
+		let refType1 = types[1] ? types[1] : types[0];
+		// тип, с которым сравниваем ходы второго родителя — первый тип фьюжна
+		let refType2 = types[0];
+
 		for (let i of template1Learnset) {
 			let move = Dex.moves.get(i);
+
 			let factor1 =
-				Dex.getEffectiveness(move.type, types[1] ? types[1] : types[0]) +
-				Number(Dex.getImmunity(move.type, types[1] ? types[1] : types[0])) -
+				Dex.getEffectiveness(move.type, refType1) +
+				Number(Dex.getImmunity(move.type, refType1)) -
 				1;
-
 			let factor2 =
-				Dex.getEffectiveness(types[1] ? types[1] : types[0], move.type) +
-				Number(Dex.getImmunity(types[1] ? types[1] : types[0], move.type)) -
+				Dex.getEffectiveness(refType1, move.type) +
+				Number(Dex.getImmunity(refType1, move.type)) -
 				1;
 
-			let effectiveness = factor2 <= 0; // т.к. factor1 <= 0 уже проверяется снаружи
+			// оба фактора одного знака (оба <=0 либо оба >=0) — типы не конфликтуют однонаправленно
+			let safeBothSigns = factor1 * factor2 >= 0;
+
 			if (
-				(factor1 <= 0 && factor2 <= 0) || // ни ход не SE к добавленному типу, ни добавленный тип не SE к ходу
+				(Dex.getEffectiveness(move.type, refType1) <= 0 && safeBothSigns) || // ход не SE к добавленному типу, и нет однонаправленного конфликта
 				types.includes(move.type) || // тип хода и так входит в итоговый фьюжн-тайпинг
 				template2Learnset.has(i as ID) || // второй родитель тоже учит этот ход
 				(template1.types[0] == types[0] && template1.types[1] == types[1]) // фьюжн сохранил тайпинг первого родителя целиком
 			)
-				//if types of fuse is the same as the pokemon1 types
 				newLearnset.add(i as ID);
 		}
+
 		for (let i of template2Learnset) {
 			let move = Dex.moves.get(i);
 
 			let factor1 =
-				Dex.getEffectiveness(move.type, types[1] ? types[1] : types[0]) +
-				Number(Dex.getImmunity(move.type, types[1] ? types[1] : types[0])) -
+				Dex.getEffectiveness(move.type, refType2) +
+				Number(Dex.getImmunity(move.type, refType2)) -
 				1;
-
 			let factor2 =
-				Dex.getEffectiveness(types[1] ? types[1] : types[0], move.type) +
-				Number(Dex.getImmunity(types[1] ? types[1] : types[0], move.type)) -
+				Dex.getEffectiveness(refType2, move.type) +
+				Number(Dex.getImmunity(refType2, move.type)) -
 				1;
 
-			let effectiveness = factor2 <= 0; // т.к. factor1 <= 0 уже проверяется снаружи
+			let safeBothSigns = factor1 * factor2 >= 0;
 
 			if (
-				(factor1 <= 0 && factor2 <= 0) || // ни ход не SE к добавленному типу, ни добавленный тип не SE к ходу
+				(Dex.getEffectiveness(move.type, refType2) <= 0 && safeBothSigns) || // ход не SE к первому типу фьюжна, и нет однонаправленного конфликта
 				types.includes(move.type) || // тип хода и так входит в итоговый фьюжн-тайпинг
-				template1Learnset.has(i as ID) || // второй родитель тоже учит этот ход
-				(template1.types[0] == types[0] && template1.types[1] == types[1]) // фьюжн сохранил тайпинг первого родителя целиком
+				template1Learnset.has(i as ID) || // первый родитель тоже учит этот ход
+				(template2.types[0] == types[0] && template2.types[1] == types[1]) // фьюжн сохранил тайпинг второго родителя целиком
 			)
-				//if types of fuse is the same as the pokemon2 types
 				newLearnset.add(i as ID);
 		}
-		console.log(newLearnset);
+
 		return newLearnset;
 	},
 
