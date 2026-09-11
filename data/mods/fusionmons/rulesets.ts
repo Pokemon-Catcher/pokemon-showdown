@@ -10,7 +10,16 @@ export const Rulesets: ModdedFormatDataTable = {
 		ruleset: ["EV Limit = 510", "Obtainable Misc", "Max Level = 100"],
 		onValidateSet(set, _format, setHas, _teamHas) {
 			const species = this.dex.species.get(this.dex.species.get(set.species).baseSpecies);
-			const species2 = this.dex.species.get(Dex.species.get(set.name.substring(1)).baseSpecies);
+			const species2Raw = Dex.species.get(set.name.substring(1))
+			const species2 = this.dex.species.get(species2Raw.baseSpecies);
+			if(species.natDexTier == 'Illegal' || (species2.natDexTier == 'Illegal' && species2.exists)){
+				return [`${species.name}+${species2.name} is Illegal in National Dex`];
+			}
+
+			if(!!Dex.species.get(set.name.substring(1)).changesFrom){
+				return [`Use +${Dex.species.get(set.name.substring(1)).changesFrom} instead of ${set.name}`];
+			}
+
 			// Any item that was legal in Gen 7 (Normal Gem for example) should be usable
 			let item = this.dex.items.get(set.item);
 			let gen = this.dex.gen;
