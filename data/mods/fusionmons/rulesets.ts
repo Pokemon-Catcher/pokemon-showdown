@@ -106,6 +106,24 @@ export const Rulesets: ModdedFormatDataTable = {
 			}
 			return problems;
 		},
+		onBegin() {
+			this.add('rule', 'Species Clause: Limit one of each Pokémon');
+		},
+		onValidateTeam(team, _format) {
+			const speciesTable = new Set<number>();
+			for (const set of team) {
+				const species = this.dex.species.get(set.species);
+				const species2 = this.dex.species.get(set.name.substring(1));
+
+				if (speciesTable.has(species.num) || (species2.exists && species2.num != species.num && speciesTable.has(species2.num))) {
+					return [`You are limited to one of each Pokémon by Species Clause.`, `(You have more than one ${species.baseSpecies})`];
+				}
+				speciesTable.add(species.num);
+				if(species2.exists && species2.num != species.num){
+					speciesTable.add(species2.num);
+				}
+			}
+		},
 	},
 	fusion: {
 		effectType: "Rule",
