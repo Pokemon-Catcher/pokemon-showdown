@@ -234,7 +234,7 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 	constructor(format: Format | string, prng: PRNG | PRNGSeed | null) {
 		super(format, prng);
 		for(let i in this.moveEnforcementCheckers){
-			this.moveEnforcementCheckers[i] = (movePool, moves, abilities, types, counter, species, teamDetails, isLead, isDoubles) =>!counter.get('Psychic');
+			this.moveEnforcementCheckers[i] = (movePool, moves, abilities, types, counter, species, teamDetails, isLead, isDoubles) => !counter.get('i');
 		}
 		
 	}
