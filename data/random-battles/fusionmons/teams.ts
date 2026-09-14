@@ -233,6 +233,10 @@ const DEFENSIVE_TERA_BLAST_USERS = [
 export default class RandomFusionmonsTeams extends RandomTeams {
 	constructor(format: Format | string, prng: PRNG | PRNGSeed | null) {
 		super(format, prng);
+		for(let i in this.moveEnforcementCheckers){
+			this.moveEnforcementCheckers[i] = (movePool, moves, abilities, types, counter, species, teamDetails, isLead, isDoubles) =>!counter.get('Psychic');
+		}
+		
 	}
 	shuffleSets(
 		set: RandomTeamsTypes.RandomSet,
@@ -776,7 +780,19 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 		// Get level
 		const level1 = this.getLevel(species, isDoubles);
 		const level2 = this.getLevel(species2, isDoubles);
-		const level = Math.min(level1, level2);
+
+		
+		
+
+		let level = Math.min(level1, level2);
+
+		//FIX FOR OP MONS
+		if(ability !== 'Truant' && [species.id,species2.id].includes('slaking' as ID)){
+			level = Math.min(level, 70)
+		} 
+		if(ability !== 'Slow Start' && [species.id,species2.id].includes('regigigas' as ID)){
+			level = Math.min(level, 70)
+		}
 
 		// Prepare optimal HP
 		const srImmunity =
@@ -1210,7 +1226,7 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 		}
 
 		// Enforce Aurora Veil if the team doesn't already have screens
-		if (!teamDetails.screens && movePool.includes('auroraveil')) {
+		if (!teamDetails.screens && movePool.includes('auroraveil') && (teamDetails.snow || teamDetails.hail)) {
 			counter = this.addMove('auroraveil', moves, types, abilities, teamDetails, species, isLead,
 				movePool, teraType, role, isDoubles);
 		}
