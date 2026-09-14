@@ -1,6 +1,0 @@
-	fusion: {
-		effectType: 'Rule',
-		name: 'Fusion',
-		desc: "Makes fusions",
-		// Implemented in mods/fusiomons/rulesets.js
-	}

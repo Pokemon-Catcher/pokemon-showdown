@@ -10,14 +10,15 @@ export const Rulesets: ModdedFormatDataTable = {
 		ruleset: ["EV Limit = 510", "Obtainable Misc", "Max Level = 100"],
 		onValidateSet(set, _format, setHas, _teamHas) {
 			const species = this.dex.species.get(this.dex.species.get(set.species).baseSpecies);
-			const species2Raw = Dex.species.get(set.name.substring(1))
+			const name = set.name.substring(1)
+			const species2Raw = this.dex.species.get(name=="Urshifu-Rapid-Strik"?"Urshifu-Rapid-Strike":name)
 			const species2 = this.dex.species.get(species2Raw.baseSpecies);
 			if(species.natDexTier == 'Illegal' || (species2.natDexTier == 'Illegal' && species2.exists)){
 				return [`${species.name}+${species2.name} is Illegal in National Dex`];
 			}
 
-			if(!!Dex.species.get(set.name.substring(1)).changesFrom){
-				return [`Use +${Dex.species.get(set.name.substring(1)).changesFrom} instead of ${set.name}`];
+			if(!!this.dex.species.get(set.name.substring(1)).changesFrom){
+				return [`Use +${this.dex.species.get(set.name.substring(1)).changesFrom} instead of ${set.name}`];
 			}
 
 			// Any item that was legal in Gen 7 (Normal Gem for example) should be usable
@@ -49,7 +50,7 @@ export const Rulesets: ModdedFormatDataTable = {
 			console.log(moveLegalityWhitelist);
 			problems.push(...this.validateStats(set, species, setSources, null));
 
-			const ability = Dex.abilities.get(set.ability);
+			const ability = this.dex.abilities.get(set.ability);
 
 			if (!set.ability) set.ability = "No Ability";
 
@@ -144,8 +145,8 @@ export const Rulesets: ModdedFormatDataTable = {
 
 			if (pokemon.name) {
 				let name = pokemon.name.substring(1, 20);
-				let template = Dex.species.get(pokemon.species.baseSpecies);
-				let template2 = Dex.species.get(pokemon.name.substring(1));
+				let template = this.dex.species.get(pokemon.species.baseSpecies);
+				let template2 = this.dex.species.get(pokemon.name.substring(1));
 				if (!template2.exists) {
 					name = pokemon.species.name;
 					template2 = pokemon.baseSpecies;
@@ -157,7 +158,7 @@ export const Rulesets: ModdedFormatDataTable = {
 
 				new_types = [template.types[0], template.types[1]];
 				if (
-					Dex.species.get(template2.baseSpecies).types != pokemon.types &&
+					this.dex.species.get(template2.baseSpecies).types != pokemon.types &&
 					!pokemon.transformed
 				) {
 					if (template2.types[1] != undefined)
@@ -193,8 +194,8 @@ export const Rulesets: ModdedFormatDataTable = {
 						pokemon.side.pokemon[i] &&
 						pokemon != pokemon.side.pokemon[i]
 					) {
-						apparentPokemon = pokemon.side.pokemon[i].species;
-						apparentPokemon2 = Dex.species.get(
+						apparentPokemon = this.dex.species.get(pokemon.side.pokemon[i].species.id);
+						apparentPokemon2 = this.dex.species.get(
 							pokemon.illusion.name.substring(1),
 						);
 
@@ -218,13 +219,10 @@ export const Rulesets: ModdedFormatDataTable = {
 							template2 = apparentPokemon;
 						}
 					} else {
-						apparentPokemon = pokemon.species;
+						apparentPokemon = this.dex.species.get(pokemon.species);
 						apparentPokemon2 = template2;
 					}
-				} else {
-					apparentPokemon = pokemon.species;
-					apparentPokemon2 = template2;
-				}
+				} 
 				FusionScript.info(
 					pokemon,
 					apparentPokemon2,
@@ -265,12 +263,12 @@ export const Rulesets: ModdedFormatDataTable = {
 				for (let pok in pokemonList[p]) {
 					if (
 						pokemonList[p][pok].name &&
-						Dex.species.get(pokemonList[p][pok].name.substring(1)).exists
+						this.dex.species.get(pokemonList[p][pok].name.substring(1)).exists
 					)
 						pokemonNames.push(
 							pokemonList[p][pok].species +
 								"+" +
-								Dex.species.get(pokemonList[p][pok].name.substring(1))
+								this.dex.species.get(pokemonList[p][pok].name.substring(1))
 									.name,
 						);
 				}

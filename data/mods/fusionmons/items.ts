@@ -22,8 +22,6 @@ export const Items: ModdedItemDataTable = {
 			}
 			if (pokemon.baseSpecies.nfe && template2.nfe) {
 				return this.chainModify(1.5);
-			} else if (pokemon.baseSpecies.nfe || template2.nfe) {
-				return this.chainModify(1.25);
 			}
 		},
 		onModifySpDPriority: 2,
@@ -40,8 +38,6 @@ export const Items: ModdedItemDataTable = {
 			}
 			if (pokemon.baseSpecies.nfe && template2.nfe) {
 				return this.chainModify(1.5);
-			} else if (pokemon.baseSpecies.nfe || template2.nfe) {
-				return this.chainModify(1.25);
 			}
 		},
 		num: 538,
@@ -74,13 +70,6 @@ export const Items: ModdedItemDataTable = {
 				(template2.baseSpecies === "cubone" || template2.baseSpecies === "marowak")
 			) {
 				return this.chainModify(2);
-			} else if (
-				pokemon.baseSpecies.baseSpecies === "cubone" ||
-				pokemon.baseSpecies.baseSpecies === "marowak" ||
-				template2.baseSpecies === "cubone" ||
-				template2.baseSpecies === "marowak"
-			) {
-				return this.chainModify(3, 2);
 			}
 		},
 		num: 258,
@@ -113,12 +102,7 @@ export const Items: ModdedItemDataTable = {
 				template2.baseSpecies === "pikachu"
 			) {
 				return this.chainModify(2);
-			} else if (
-				pokemon.baseSpecies.baseSpecies === "pikachu" ||
-				template2.baseSpecies === "pikachu"
-			) {
-				return this.chainModify(1.5);
-			}
+			} 
 		},
 		onModifySpAPriority: 1,
 		onModifySpA: function (spa, pokemon) {
@@ -137,11 +121,6 @@ export const Items: ModdedItemDataTable = {
 				(template2.baseSpecies === "pikachu")
 			) {
 				return this.chainModify(2);
-			} else if (
-				pokemon.baseSpecies.baseSpecies === "pikachu" ||
-				template2.baseSpecies === "pikachu"
-			) {
-				return this.chainModify(3, 2);
 			}
 		},
 		num: 236,
@@ -172,11 +151,6 @@ export const Items: ModdedItemDataTable = {
 				(template2.baseSpecies === "farfetchd")
 			) {
 				return critRatio + 2;
-			} else if (
-				(user.baseSpecies.baseSpecies === "farfetchd") ||
-				(template2.baseSpecies === "farfetchd")
-			) {
-				return critRatio + 1;
 			}
 		},
 		num: 259,
@@ -208,12 +182,7 @@ export const Items: ModdedItemDataTable = {
 				(template2.baseSpecies === "clamperl")
 			) {
 				return this.chainModify(2);
-			} else if (
-				(pokemon.baseSpecies.baseSpecies === "clamperl") ||
-				(template2.baseSpecies === "clamperl")
-			) {
-				return this.chainModify(1.5);
-			}
+			} 
 		},
 		num: 227,
 		gen: 3,
@@ -243,11 +212,6 @@ export const Items: ModdedItemDataTable = {
 				(template2.baseSpecies === "clamperl")
 			) {
 				return this.chainModify(2);
-			} else if (
-				(pokemon.baseSpecies.baseSpecies === "clamperl") ||
-				(template2.baseSpecies === "clamperl")
-			) {
-				return this.chainModify(1.5);
 			}
 		},
 		num: 226,
@@ -280,13 +244,6 @@ export const Items: ModdedItemDataTable = {
 				(move.type === "Psychic" || move.type === "Dragon")
 			) {
 				return this.chainModify([0x1333, 0x1000]);
-			} else if (
-				move &&
-				(user.baseSpecies.num === 380 || user.baseSpecies.num === 381) ||
-					(template2.num === 380 || template2.num === 381) &&
-				(move.type === "Psychic" || move.type === "Dragon")
-			) {
-				return this.chainModify([0x1333, 0x2000]);
 			}
 		},
 		num: 225,
@@ -319,14 +276,7 @@ export const Items: ModdedItemDataTable = {
 				(move.type === "Steel" || move.type === "Dragon")
 			) {
 				return this.chainModify([0x1333, 0x1000]);
-			} else if (
-				move &&
-				(user.baseSpecies.baseSpecies === "dialga" ||
-					template2.baseSpecies === "dialga") &&
-				(move.type === "Steel" || move.type === "Dragon")
-			) {
-				return this.chainModify([0x1333, 0x2000]);
-			}
+			} 
 		},
 		num: 135,
 		gen: 4,
@@ -357,13 +307,7 @@ export const Items: ModdedItemDataTable = {
 				!pokemon.transformed
 			) {
 				return this.chainModify(2);
-			} else if (
-				(pokemon.baseSpecies.baseSpecies === "ditto") ||
-					(template2.baseSpecies === "ditto") &&
-				!pokemon.transformed
-			) {
-				return this.chainModify(1.5);
-			}
+			} 
 		},
 		num: 257,
 		gen: 2,
@@ -393,12 +337,6 @@ export const Items: ModdedItemDataTable = {
 				!pokemon.transformed
 			) {
 				return this.chainModify(2);
-			} else if (
-				(pokemon.baseSpecies.baseSpecies === "ditto") ||
-					(template2.baseSpecies === "ditto") &&
-				!pokemon.transformed
-			) {
-				return this.chainModify(1.5);
 			}
 		},
 		num: 274,
@@ -428,12 +366,7 @@ export const Items: ModdedItemDataTable = {
 				(template2.baseSpecies === "chansey")
 			) {
 				return critRatio + 2;
-			} else if (
-				(user.baseSpecies.baseSpecies === "chansey") ||
-				(template2.baseSpecies === "chansey")
-			) {
-				return critRatio + 1;
-			}
+			} 
 		},
 		num: 256,
 		gen: 2,
@@ -465,14 +398,7 @@ export const Items: ModdedItemDataTable = {
 				(move.type === "Water" || move.type === "Dragon")
 			) {
 				return this.chainModify([0x1333, 0x1000]);
-			} else if (
-				move &&
-				(user.baseSpecies.baseSpecies === "palkia" ||
-					template2.baseSpecies === "palkia") &&
-				(move.type === "Water" || move.type === "Dragon")
-			) {
-				return this.chainModify([0x1333, 0x2000]);
-			}
+			} 
 		},
 		num: 136,
 		gen: 4,
@@ -499,17 +425,11 @@ export const Items: ModdedItemDataTable = {
 			}
 			if (
 				move &&
-				user.baseSpecies.num === 487 &&
-				template2.num === 487 &&
+				(user.baseSpecies.num === 487 ||
+				template2.num === 487) &&
 				(move.type === "Ghost" || move.type === "Dragon")
 			) {
 				return this.chainModify([0x1333, 0x1000]);
-			} else if (
-				move &&
-				(user.baseSpecies.num === 487 || template2.num === 487) &&
-				(move.type === "Ghost" || move.type === "Dragon")
-			) {
-				return this.chainModify([0x1333, 0x2000]);
 			}
 		},
 		onTakeItem: function (item, pokemon, source) {
