@@ -1051,6 +1051,10 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 		const baseStats = FusionScript.fuseStatsCalculate(species,species2)
 		const physGap = baseStats.atk - baseStats.spa;
 		
+		if(types.has('Ghost') && movePool.includes('curse')){
+			this.fastPopSafe(movePool, movePool.indexOf('curse'));
+		}
+
 		if(species.baseSpecies !== 'Morpeko' && movePool.includes('aurawheel')){
 			this.fastPopSafe(movePool, movePool.indexOf('aurawheel'));
 		}
