@@ -2477,6 +2477,8 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 				return species.baseSpecies != 'Cramorant' || !moves.has('Surf')
 			case 'Zero to Hero':
 				return species.baseSpecies != 'Palafin'
+			case 'Ice Face':
+				return species.baseSpecies != 'Eiscue'
 			}
 	
 			return false;
