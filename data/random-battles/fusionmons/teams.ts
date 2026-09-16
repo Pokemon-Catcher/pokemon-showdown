@@ -678,7 +678,7 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 		// Obtain a list of abilities that are allowed (not culled)
 		for (const ability of abilities) {
 			if (
-				!this.shouldCullAbility(
+				!this.shouldCullFusionAbility(
 					ability,
 					types,
 					moves,
@@ -686,6 +686,7 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 					counter,
 					teamDetails,
 					species,
+					species2,
 					role,
 					isLead,
 					isDoubles,
@@ -2421,4 +2422,63 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 			move.overrideOffensiveStat === 'spd'
 		);
 	}
+
+	shouldCullFusionAbility(
+			ability: string,
+			types: Set<string>,
+			moves: Set<string>,
+			abilities: string[],
+			counter: MoveCounter,
+			teamDetails: RandomTeamsTypes.TeamDetails,
+			species: Species,
+			species2: Species,
+			role: RandomTeamsTypes.Role,
+			isLead: boolean,
+			isDoubles: boolean,
+		): boolean {
+			switch (ability) {
+			// Abilities which are primarily useful for certain moves or with team support
+			case 'Chlorophyll': case 'Solar Power':
+				return !teamDetails.sun;
+			case 'Defiant':
+				return (species.id === 'thundurus' && !!counter.get('Status'));
+			case 'Hydration': case 'Swift Swim':
+				return !teamDetails.rain;
+			case 'Iron Fist': case 'Skill Link':
+				return !counter.get(toID(ability));
+			case 'Overgrow':
+				return !counter.get('Grass');
+			case 'Prankster':
+				return !counter.get('Status');
+			case 'Sand Force': case 'Sand Rush':
+				return !teamDetails.sand;
+			case 'Slush Rush':
+				return !teamDetails.snow;
+			case 'Swarm':
+				return !counter.get('Bug');
+			case 'Torrent':
+				return (!counter.get('Water') && !moves.has('flipturn'));
+			case 'Multitype':
+				return species.baseSpecies !== 'Arceus' && species2.baseSpecies !== 'Arceus';
+			case 'RKS System':
+				return species.baseSpecies !== 'Silvally' && species2.baseSpecies !== 'Silvally';
+			case 'Huge Power':
+			case 'Pure Power':
+			case 'Guts':
+			case 'Toxic Boost':
+				return !counter.get('physical');
+			case 'Hunger Switch':
+				return species.baseSpecies != 'Morpeko'
+			case 'Shields Down':
+				return species.baseSpecies != 'Minior'
+			case 'Disguise':
+				return species.baseSpecies != 'Mimikyu'
+			case 'Gulp Missile':
+				return species.baseSpecies != 'Cramorant' || !moves.has('Surf')
+			case 'Zero to Hero':
+				return species.baseSpecies != 'Palafin'
+			}
+	
+			return false;
+		}
 }
