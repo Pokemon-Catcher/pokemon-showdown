@@ -567,7 +567,6 @@ export const roles: {
 			"Bullet Seed": true,
 			"Rock Tomb": true,
 			Spore: true,
-			"Giga Impact": true,
 			"Bullet Punch": true,
 			"Ice Punch": true,
 			"Zen Headbutt": true,

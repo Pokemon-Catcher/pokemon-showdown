@@ -9,20 +9,66 @@ export const Rulesets: ModdedFormatDataTable = {
 		name: "fusionlearnsets",
 		ruleset: ["EV Limit = 510", "Obtainable Misc", "Max Level = 100"],
 		onValidateSet(set, _format, setHas, _teamHas) {
-			const species = this.dex.species.get(this.dex.species.get(set.species).baseSpecies);
-			const name = set.name.substring(1)
-			const species2Raw = this.dex.species.get(name=="Urshifu-Rapid-Strik"?"Urshifu-Rapid-Strike":name)
-			const species2 = this.dex.species.get(species2Raw.baseSpecies);
-			if(species.natDexTier == 'Illegal' || (species2.natDexTier == 'Illegal' && species2.exists)){
-				return [`${species.name}+${species2.name} is Illegal in National Dex`];
+			const species = this.dex.species.get(
+				this.dex.species.get(set.species).baseSpecies,
+			);
+			const species2 = FusionScript.parseName(set.name);
+			if (
+				species.natDexTier == "Illegal" ||
+				(species2.natDexTier == "Illegal" && species2.exists)
+			) {
+				return [
+					`${species.name}+${species2.name} is Illegal in National Dex`,
+				];
 			}
-
-			if(!!this.dex.species.get(set.name.substring(1)).changesFrom){
-				return [`Use +${this.dex.species.get(set.name.substring(1)).changesFrom} instead of ${set.name}`];
-			}
-
 			// Any item that was legal in Gen 7 (Normal Gem for example) should be usable
 			let item = this.dex.items.get(set.item);
+			if (!!species2.battleOnly) {
+				let baseSpecies;
+				if (Array.isArray(species2.battleOnly)) {
+					baseSpecies = species2.battleOnly.join(" or ");
+				} else baseSpecies = species2.battleOnly;
+				return [`Use ${baseSpecies} instead of ${species2.name}`];
+			}
+
+			if (species2.isMega) {
+				return [`${species2.name} can't be used to fuse`];
+			}
+
+			if (
+				species2.requiredItems &&
+				!species2.requiredItems.includes(item.name)
+			) {
+				return [
+					`${species2.name} requires on these items: ${species2.requiredItems.join(", ")}`,
+				];
+			}
+
+			if (
+				species2.requiredItems &&
+				species2.requiredItems.includes(item.name)
+			) {
+				if (
+					species2.baseSpecies == "Arceus" &&
+					toID(set.ability) != "multitype"
+				) {
+					return [`${species2.name} requires ability "Multitype"`];
+				} else if (
+					species2.baseSpecies == "Silvally" &&
+					toID(set.ability) != "rkssystem"
+				) {
+					return [`${species2.name} requires ability "RKS System"`];
+				}
+			}
+			if (
+				species2.requiredMove &&
+				!set.moves.map(toID).includes(toID(species2.requiredMove))
+			) {
+				return [
+					`${species2.name} requires this move: ${species2.requiredMove}`,
+				];
+			}
+
 			let gen = this.dex.gen;
 			while (item.isNonstandard && gen >= 7) {
 				item = this.dex.forGen(gen).items.get(item.id);
@@ -117,7 +163,7 @@ export const Rulesets: ModdedFormatDataTable = {
 			return problems;
 		},
 		onBegin() {
-			this.add('rule', 'Species Clause: Limit one of each Pokémon');
+			this.add("rule", "Species Clause: Limit one of each Pokémon");
 		},
 		onValidateTeam(team, _format) {
 			const speciesTable = new Set<number>();
@@ -125,11 +171,19 @@ export const Rulesets: ModdedFormatDataTable = {
 				const species = this.dex.species.get(set.species);
 				const species2 = this.dex.species.get(set.name.substring(1));
 
-				if (speciesTable.has(species.num) || (species2.exists && species2.num != species.num && speciesTable.has(species2.num))) {
-					return [`You are limited to one of each Pokémon by Species Clause.`, `(You have more than one ${species.baseSpecies})`];
+				if (
+					speciesTable.has(species.num) ||
+					(species2.exists &&
+						species2.num != species.num &&
+						speciesTable.has(species2.num))
+				) {
+					return [
+						`You are limited to one of each Pokémon by Species Clause.`,
+						`(You have more than one ${species.baseSpecies})`,
+					];
 				}
 				speciesTable.add(species.num);
-				if(species2.exists && species2.num != species.num){
+				if (species2.exists && species2.num != species.num) {
 					speciesTable.add(species2.num);
 				}
 			}
@@ -158,7 +212,8 @@ export const Rulesets: ModdedFormatDataTable = {
 
 				new_types = [template.types[0], template.types[1]];
 				if (
-					this.dex.species.get(template2.baseSpecies).types != pokemon.types &&
+					this.dex.species.get(template2.baseSpecies).types !=
+						pokemon.types &&
 					!pokemon.transformed
 				) {
 					if (template2.types[1] != undefined)
@@ -194,7 +249,9 @@ export const Rulesets: ModdedFormatDataTable = {
 						pokemon.side.pokemon[i] &&
 						pokemon != pokemon.side.pokemon[i]
 					) {
-						apparentPokemon = this.dex.species.get(pokemon.side.pokemon[i].species.id);
+						apparentPokemon = this.dex.species.get(
+							pokemon.side.pokemon[i].species.id,
+						);
 						apparentPokemon2 = this.dex.species.get(
 							pokemon.illusion.name.substring(1),
 						);
@@ -222,7 +279,7 @@ export const Rulesets: ModdedFormatDataTable = {
 						apparentPokemon = this.dex.species.get(pokemon.species);
 						apparentPokemon2 = template2;
 					}
-				} 
+				}
 				FusionScript.info(
 					pokemon,
 					apparentPokemon2,
@@ -263,13 +320,15 @@ export const Rulesets: ModdedFormatDataTable = {
 				for (let pok in pokemonList[p]) {
 					if (
 						pokemonList[p][pok].name &&
-						this.dex.species.get(pokemonList[p][pok].name.substring(1)).exists
+						this.dex.species.get(pokemonList[p][pok].name.substring(1))
+							.exists
 					)
 						pokemonNames.push(
 							pokemonList[p][pok].species +
 								"+" +
-								this.dex.species.get(pokemonList[p][pok].name.substring(1))
-									.name,
+								this.dex.species.get(
+									pokemonList[p][pok].name.substring(1),
+								).name,
 						);
 				}
 				this.add(
