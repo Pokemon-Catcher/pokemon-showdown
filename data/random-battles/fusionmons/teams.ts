@@ -670,6 +670,9 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 		if(abilities.includes('Snow Warning') && moves.has('auroraveil')){
 			return "Snow Warning"
 		}
+		if(abilities.includes('No Guard') && moves.has('dynamicpunch')){
+			return "No Guard"
+		}
 			
 		const abilityAllowed: string[] = [];
 		// Obtain a list of abilities that are allowed (not culled)
@@ -1054,6 +1057,10 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 		if(!movePool.includes('bodypress')){
 			this.fastPopSafe(movePool, movePool.indexOf('irondefense'));
 		}
+		if(movePool.includes('dynamicpunch') && !abilities.includes('No Guard')){
+			this.fastPopSafe(movePool, movePool.indexOf('dynamicpunch'));
+		}
+
 		if(!abilities.includes('Quick Feet') && !abilities.includes('Toxic Boost') && !abilities.includes('Guts') && movePool.includes('facade')){
 			this.fastPopSafe(movePool, movePool.indexOf('facade'));
 		}
