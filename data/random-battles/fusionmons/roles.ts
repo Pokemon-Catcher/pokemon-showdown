@@ -1533,7 +1533,6 @@ export const roles: {
 			"Stomping Tantrum": true,
 			Hurricane: true,
 			"Weather Ball": true,
-			"Giga Impact": true,
 			Facade: true,
 			"Fake Out": true,
 			"Headlong Rush": true,
