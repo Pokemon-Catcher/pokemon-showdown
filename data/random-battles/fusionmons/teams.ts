@@ -673,6 +673,9 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 		if(abilities.includes('No Guard') && moves.has('dynamicpunch')){
 			return "No Guard"
 		}
+		if(counter.get('pulse') && abilities.includes('Mega Launcher')){
+			return "Mega Launcher"
+		}
 			
 		const abilityAllowed: string[] = [];
 		// Obtain a list of abilities that are allowed (not culled)
@@ -1054,6 +1057,10 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 		
 		if(types.has('Ghost') && movePool.includes('curse')){
 			this.fastPopSafe(movePool, movePool.indexOf('curse'));
+		}
+
+		if(!abilities.includes('Mega Launcher') && movePool.includes('waterpulse')){
+			this.fastPopSafe(movePool, movePool.indexOf('waterpulse'));
 		}
 
 		if(species.baseSpecies !== 'Morpeko' && movePool.includes('aurawheel')){
@@ -2479,8 +2486,88 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 				return species.baseSpecies != 'Palafin'
 			case 'Ice Face':
 				return species.baseSpecies != 'Eiscue'
+			case 'Mega Launcher':
+				return !counter.get('pulse');
 			}
 	
 			return false;
+		}
+	override queryMoves(
+			moves: Set<string> | null,
+			species: Species,
+			teraType: string,
+			abilities: string[],
+		): MoveCounter {
+			// This is primarily a helper function for random setbuilder functions.
+			const counter = new MoveCounter();
+			const types = new Set(species.types);
+			if (!moves?.size) return counter;
+	
+			const categories = { Physical: 0, Special: 0, Status: 0 };
+	
+			// Iterate through all moves we've chosen so far and keep track of what they do:
+			for (const moveid of moves) {
+				let move = this.dex.moves.get(moveid);
+				// Nature Power calls Earthquake in Gen 5 and Tri Attack in Gens 6-9
+				if (this.gen === 5 && moveid === 'naturepower') move = this.dex.moves.get('earthquake');
+				if (this.gen > 5 && moveid === 'naturepower') move = this.dex.moves.get('triattack');
+	
+				const moveType = this.getMoveType(move, species, abilities, teraType);
+				if (move.damage || move.damageCallback) {
+					// Moves that do a set amount of damage:
+					counter.add('damage');
+					counter.damagingMoves.add(move);
+				} else {
+					// Are Physical/Special/Status moves:
+					categories[move.category]++;
+				}
+				// Moves that have a low base power:
+				if (moveid === 'lowkick' || (move.basePower && move.basePower <= 60 && !['nuzzle', 'rapidspin'].includes(moveid))) {
+					counter.add('technician');
+				}
+				// Moves that hit up to 5 times:
+				if (move.multihit && Array.isArray(move.multihit) && move.multihit[1] === 5) counter.add('skilllink');
+				if (move.recoil || move.hasCrashDamage) counter.add('recoil');
+				if (move.drain) counter.add('drain');
+				if (move.flags.pulse) counter.add('pulse');
+				// Moves which have a base power:
+				if (move.basePower || move.basePowerCallback) {
+					counter.basePowerMoves.add(move);
+					if (!this.noStab.includes(moveid) || this.priorityPokemon.includes(species.id) && move.priority > 0) {
+						counter.add(moveType);
+						if (types.has(moveType)) counter.add('stab');
+						if (teraType === moveType) counter.add('stabtera');
+						counter.damagingMoves.add(move);
+					}
+					if (move.flags['bite']) counter.add('strongjaw');
+					if (move.flags['punch']) counter.add('ironfist');
+					if (move.flags['sound']) counter.add('sound');
+					if (move.priority > 0 || (moveid === 'grassyglide' && abilities.includes('Grassy Surge'))) {
+						counter.add('priority');
+					}
+				}
+				// Moves with secondary effects:
+				if (move.secondary || move.hasSheerForceBoost) {
+					counter.add('sheerforce');
+				}
+				// Moves with low accuracy:
+				if (move.accuracy && move.accuracy !== true && move.accuracy < 90) counter.add('inaccurate');
+	
+				// Moves that change stats:
+				if (RECOVERY_MOVES.includes(moveid)) counter.add('recovery');
+				if (CONTRARY_MOVES.includes(moveid)) counter.add('contrary');
+				if (PHYSICAL_SETUP.includes(moveid)) counter.add('physicalsetup');
+				if (SPECIAL_SETUP.includes(moveid)) counter.add('specialsetup');
+				if (MIXED_SETUP.includes(moveid)) counter.add('mixedsetup');
+				if (SPEED_SETUP.includes(moveid)) counter.add('speedsetup');
+				if (SPEED_CONTROL.includes(moveid)) counter.add('speedcontrol');
+				if (SETUP.includes(moveid)) counter.add('setup');
+				if (HAZARDS.includes(moveid)) counter.add('hazards');
+			}
+	
+			counter.set('Physical', Math.floor(categories['Physical']));
+			counter.set('Special', Math.floor(categories['Special']));
+			counter.set('Status', categories['Status']);
+			return counter;
 		}
 }
