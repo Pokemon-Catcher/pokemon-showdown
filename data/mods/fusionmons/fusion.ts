@@ -3,13 +3,31 @@ import { Species } from "../../../sim/dex-species";
 import { Dex } from "../../../sim";
 
 export const FusionScript = {
-	parseName: function (name: string) {
-		name = name.substring(1);
+	parseName: function (pokemon: Pokemon|PokemonSet) {
+		let name = pokemon.name.substring(1);
 		let species = Dex.species.get(
 			name == "Urshifu-Rapid-Strik" ? "Urshifu-Rapid-Strike" : name,
 		);
-		if (species.changesFrom) {
-			species = Dex.species.get(species.changesFrom);
+		const item = Dex.items.get(pokemon.item);
+		// if (species.changesFrom) {
+		// 	species = Dex.species.get(species.changesFrom);
+		// }
+		if (species.num === 493) {
+			species = Dex.species.get(
+				item &&
+					item.onPlate &&
+					Dex.abilities.get(pokemon.ability).id == "multitype"
+					? "Arceus-" + item.onPlate
+					: "Arceus",
+			);
+		} else if (species.num === 773) {
+			species = Dex.species.get(
+				item &&
+					item.onMemory &&
+					Dex.abilities.get(pokemon.ability).id == "rkssystem"
+					? "Silvally-" + item.onMemory
+					: "Silvally",
+			);
 		}
 		return species;
 	},
@@ -20,7 +38,7 @@ export const FusionScript = {
 		const item = Dex.items.get(pokemon.item);
 		//Extract second pokemon from name of first pokemon
 		if (pokemon.name) {
-			template2 = this.parseName(pokemon.name);
+			template2 = this.parseName(pokemon);
 
 			if (!template2.exists) {
 				template2 = Dex.species.get(template.baseSpecies);
@@ -50,23 +68,7 @@ export const FusionScript = {
 					: "Silvally",
 			);
 		}
-		if (template2.num === 493) {
-			template2 = Dex.species.get(
-				item &&
-					item.onPlate &&
-					Dex.abilities.get(pokemon.ability).id == "multitype"
-					? "Arceus-" + item.onPlate
-					: "Arceus",
-			);
-		} else if (template2.num === 773) {
-			template2 = Dex.species.get(
-				item &&
-					item.onMemory &&
-					Dex.abilities.get(pokemon.ability).id == "rkssystem"
-					? "Silvally-" + item.onMemory
-					: "Silvally",
-			);
-		}
+		
 
 		let stats = this.fuseStatsCalculate(template1, template2);
 		let new_types = [template1.types[0], template1.types[1]]; //Used for new types
@@ -89,7 +91,6 @@ export const FusionScript = {
 		new_types = new_types.filter((t) => t !== undefined);
 		if (new_types.length === 0) new_types = [template1.types[0] || "Normal"];
 		let templateResult = template1; //Result template
-		pokemon.removeVolatile("hybride");
 		//Assigning stats, weight, types to result template
 		if (
 			template2.exists &&
@@ -123,7 +124,7 @@ export const FusionScript = {
 			apparentTypes = pokemon.types;
 		}
 		if (!apparentPokemon2) {
-			apparentPokemon2 = this.parseName(pokemon.name);
+			apparentPokemon2 = this.parseName(pokemon);
 		}
 		if (
 			apparentPokemon2 &&
@@ -175,12 +176,11 @@ export const FusionScript = {
 		}
 	},
 	afterMega: function (pokemon: Pokemon) {
-		pokemon.removeVolatile("hybride");
 
 		let template = Dex.species.get(
 			Dex.species.get(pokemon.species.id).otherFormes?.[0],
 		);
-		let template2 = this.parseName(pokemon.name);
+		let template2 = this.parseName(pokemon);
 		if (!template2.exists) {
 			template2 = template;
 		}

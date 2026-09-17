@@ -1,6 +1,6 @@
 import { ModdedFormatDataTable } from "../../../sim/dex-formats";
 import { FusionScript } from "./fusion";
-
+import { toID } from "../../../sim";
 /**@type {{[k: string]: ModdedFormatsData}} */
 
 export const Rulesets: ModdedFormatDataTable = {
@@ -12,7 +12,7 @@ export const Rulesets: ModdedFormatDataTable = {
 			const species = this.dex.species.get(
 				this.dex.species.get(set.species).baseSpecies,
 			);
-			const species2 = FusionScript.parseName(set.name);
+			const species2 = FusionScript.parseName(set);
 			if (
 				species.natDexTier == "Illegal" ||
 				(species2.natDexTier == "Illegal" && species2.exists)
@@ -192,6 +192,7 @@ export const Rulesets: ModdedFormatDataTable = {
 	fusion: {
 		effectType: "Rule",
 		name: "Fusion",
+		onSwitchInPriority:101,
 		onSwitchIn: function (pokemon) {
 			if (pokemon.terastallized) {
 				return;
@@ -224,7 +225,7 @@ export const Rulesets: ModdedFormatDataTable = {
 				new_types = new_types.filter((t) => t !== undefined);
 				if (new_types.length === 0)
 					new_types = [template.types[0] || "Normal"];
-				pokemon.setType(new_types.filter(Boolean), true);
+				//pokemon.setType(new_types.filter(Boolean), true);
 
 				//Zoroark Illusion
 				let apparentPokemon;
@@ -288,7 +289,29 @@ export const Rulesets: ModdedFormatDataTable = {
 				);
 			}
 		},
-		onSwitchInPriority: 100,
+		onType:function (types,pokemon){
+			if (pokemon.terastallized) {
+				return types;
+			}
+
+			if (pokemon.name) {
+				let template = this.dex.species.get(pokemon.species.baseSpecies);
+				let template2 = this.dex.species.get(FusionScript.parseName(pokemon));
+				return FusionScript.fuseTypes(template.types,template2.types)
+			}
+
+			return types
+		},
+		onTypePriority: 2,
+		onModifySpecies(species, target, _source, _effect) {
+			const newSpecies = this.dex.deepClone(species)
+			if (!species.isMega && target)
+				return FusionScript.fuse(newSpecies, target);
+		},
+		onModifySpeciesPriority:2,
+		onAfterMega: function (pokemon) {
+			FusionScript.afterMega(pokemon);
+		},
 	},
 	teampreview: {
 		effectType: "Rule",

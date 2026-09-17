@@ -20,14 +20,6 @@ export const Formats: FormatList = [
 			"HP Percentage Mod",
 			"Cancel Mod",
 		],
-		onAfterMega: function (pokemon) {
-			FusionScript.afterMega(pokemon);
-		},
-		onModifySpecies(species, target, _source, _effect) {
-			if (!FusionScript.fuse) return;
-			if (!species.isMega && target)
-				return FusionScript.fuse(species, target);
-		},
 	},
 	{
 		name: "[Gen 9] National Dex Fusionmons AG",
@@ -48,14 +40,7 @@ export const Formats: FormatList = [
 			"Team Preview",
 		],
 		banlist: ["Shadow Tag", "Arena Trap", "CAP", "Gengarite", "Baton Pass"],
-		onAfterMega: function (pokemon) {
-			FusionScript.afterMega(pokemon);
-		},
-		onModifySpecies(species, target, _source, _effect) {
-			if (!FusionScript.fuse) return;
-			if (!species.isMega && target)
-				return FusionScript.fuse(species, target);
-		},
+		
 	},
 	// {
 	// 	name: "[Gen 9] Fusionmons Ubers",
@@ -116,13 +101,5 @@ export const Formats: FormatList = [
 			"Gravity ++ Sing",
 			"Gravity ++ Sleep Powder",
 		],
-		onAfterMega: function (pokemon) {
-			FusionScript.afterMega(pokemon);
-		},
-		onModifySpecies(species, target, _source, _effect) {
-			if (!FusionScript.fuse) return;
-			if (!species.isMega && target)
-				return FusionScript.fuse(species, target);
-		},
 	},
 ];

@@ -3,23 +3,38 @@ import { ModdedConditionDataTable } from "../../../sim/dex-conditions";
 
 export const Conditions:ModdedConditionDataTable = {
 	arceus: {
-		onSwitchInPriority: 101,
-		onSwitchIn: function (pokemon: Pokemon) {
-			let type = pokemon.types;
-			if (pokemon.ability === "multitype") {
-				type[0] = pokemon.getItem().onPlate ?? type[0];
+		name: 'Arceus',
+		onTypePriority: 1,
+		onType(types, pokemon) {
+			if(pokemon.species.num !== 493) return types
+			if (pokemon.transformed || pokemon.ability !== 'multitype' && this.gen >= 8) return types;
+			let type: string | undefined = 'Normal';
+			if (pokemon.ability === 'multitype') {
+				type = pokemon.getItem().onPlate??'Normal';
 			}
-			pokemon.setType(type, true);
+			if(types[0]){
+				types[0] = type
+			}
+			return types;
 		},
 	},
 	silvally: {
-		onSwitchInPriority: 101,
-		onSwitchIn: function (pokemon: Pokemon) {
-			let type = pokemon.types;
-			if (pokemon.ability === "rkssystem") {
-				type[0] = pokemon.getItem().onMemory ?? type[0];
+		name: 'Silvally',
+		onTypePriority: 1,
+		onType(types, pokemon) {
+			if(pokemon.species.num !== 772) return types
+			if (pokemon.transformed || pokemon.ability !== 'rkssystem' && this.gen >= 8) return types;
+			let type: string | undefined = 'Normal';
+			if (pokemon.ability === 'rkssystem') {
+				type = pokemon.getItem().onMemory;
+				if (!type) {
+					type = 'Normal';
+				}
 			}
-			pokemon.setType(type, true);
+			if(types[0]){
+				types[0] = type
+			}
+			return types;
 		},
 	},
 };
