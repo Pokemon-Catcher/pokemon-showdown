@@ -4,11 +4,30 @@ import RandomTeams, { MoveCounter } from "../gen9/teams";
 import { toID } from "../../../sim/dex";
 import { roles } from "./roles";
 
+const NORMAL_MOVES_WHITE_LIST = new Set([
+	"revelationdance",
+	"judgment",
+	"boomburst",
+]);
+
 const STAT_INDEPENDENT_MOVES = new Set([
-	'seismictoss', 'nightshade', 'dragonrage', 'sonicboom', 'psywave',
-	'superfang', 'naturesmadness', 'ruination', 'endeavor', 'finalgambit',
-	'guardianofalola', 'counter', 'mirrorcoat', 'metalburst', 'comeuppance',
-	'foulplay', 'bodypress',
+	"seismictoss",
+	"nightshade",
+	"dragonrage",
+	"sonicboom",
+	"psywave",
+	"superfang",
+	"naturesmadness",
+	"ruination",
+	"endeavor",
+	"finalgambit",
+	"guardianofalola",
+	"counter",
+	"mirrorcoat",
+	"metalburst",
+	"comeuppance",
+	"foulplay",
+	"bodypress",
 ]);
 // Moves that restore HP:
 const RECOVERY_MOVES = [
@@ -204,6 +223,7 @@ const MOVE_PAIRS = [
 	["leechseed", "substitute"],
 	["perishsong", "protect"],
 	["bodypress", "irondefense"],
+	["bodypress", "acidarmor"],
 ];
 
 /** Pokemon who always want priority STAB, and are fine with it as its only STAB move of that type */
@@ -662,21 +682,36 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 			return "Slush Rush";
 		if (abilities.includes("Drought") && moves.has("solarbeam"))
 			return "Drought";
+
 		if (
 			abilities.includes("Multitype") &&
 			(species.baseSpecies == "Arceus" || species2.baseSpecies == "Arceus")
 		)
 			return "Multitype";
-		if(abilities.includes('Snow Warning') && moves.has('auroraveil')){
-			return "Snow Warning"
+		if (abilities.includes("Snow Warning") && moves.has("auroraveil")) {
+			return "Snow Warning";
 		}
-		if(abilities.includes('No Guard') && moves.has('dynamicpunch')){
-			return "No Guard"
+		if (abilities.includes("No Guard") && moves.has("dynamicpunch")) {
+			return "No Guard";
 		}
-		if(counter.get('pulse') && abilities.includes('Mega Launcher')){
-			return "Mega Launcher"
+		if (counter.get("pulse") && abilities.includes("Mega Launcher")) {
+			return "Mega Launcher";
 		}
-			
+		if (abilities.includes("Serene Grace") && counter.get("sheerforce"))
+			return "Serene Grace";
+
+		if (moves.has("weatherball") && abilities.includes("Drought"))
+			return "Drought";
+
+		if (moves.has("weatherball") && abilities.includes("Drizzle"))
+			return "Drizzle";
+
+		if (moves.has("weatherball") && abilities.includes("Sand Stream"))
+			return "Sand Stream";
+
+		if (moves.has("weatherball") && abilities.includes("Snow Warning"))
+			return "Snow Warning";
+
 		const abilityAllowed: string[] = [];
 		// Obtain a list of abilities that are allowed (not culled)
 		for (const ability of abilities) {
@@ -820,9 +855,38 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 			role,
 			isDoubles,
 		);
-		const moves = new Set(
-			this.multipleSamplesNoReplace([...movesUnfiltered], this.maxMoveCount),
-		);
+		const pairedMoves: string[] = [];
+		const movePairs = this.getMovePairs(abilities);
+		movesUnfiltered.forEach((m) => {
+			if (
+				movePairs.some(
+					(v) =>
+						(v[0] == m && movesUnfiltered.has(v[1])) ||
+						(v[1] == m && movesUnfiltered.has(v[0])),
+				)
+			) {
+				pairedMoves.push(m);
+			}
+		});
+
+		const moves = new Set<string>();
+		for (const v of pairedMoves) {
+			if (moves.size >= this.maxMoveCount) {
+				break;
+			}
+			moves.add(v);
+		}
+
+		if (moves.size < this.maxMoveCount) {
+			const residualMoves = this.multipleSamplesNoReplace(
+				[...movesUnfiltered],
+				this.maxMoveCount - moves.size,
+			);
+			for (let v of residualMoves) {
+				moves.add(v);
+			}
+		}
+
 		const counter = this.queryMoves(moves, species, teraType, abilities);
 
 		// Get ability
@@ -1052,60 +1116,155 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 	): void {
 		if (moves.size + movePool.length <= this.maxMoveCount) return;
 		// If we have two unfilled moves and only one unpaired move, cull the unpaired move.
-		const baseStats = FusionScript.fuseStatsCalculate(species,species2)
+		const baseStats = FusionScript.fuseStatsCalculate(species, species2);
 		const physGap = baseStats.atk - baseStats.spa;
-		
-		if(types.has('Ghost') && movePool.includes('curse')){
-			this.fastPopSafe(movePool, movePool.indexOf('curse'));
+
+		if (types.has("Ghost") && movePool.includes("curse")) {
+			this.fastPopSafe(movePool, movePool.indexOf("curse"));
 		}
 
-		if(!abilities.includes('Mega Launcher') && movePool.includes('waterpulse')){
-			this.fastPopSafe(movePool, movePool.indexOf('waterpulse'));
+		if (
+			!abilities.includes("Drizzle") &&
+			!abilities.includes("Drought") &&
+			!abilities.includes("Snow Warning") &&
+			!abilities.includes("Sand Stream") &&
+			movePool.includes("weatherball")
+		) {
+			this.fastPopSafe(movePool, movePool.indexOf("weatherball"));
 		}
 
-		if(species.baseSpecies !== 'Morpeko' && movePool.includes('aurawheel')){
-			this.fastPopSafe(movePool, movePool.indexOf('aurawheel'));
+		if (
+			!abilities.includes("Serene Grace") &&
+			movePool.includes("headbutt")
+		) {
+			this.fastPopSafe(movePool, movePool.indexOf("headbutt"));
 		}
 
-		if(species.baseSpecies !== 'Darkrai' && movePool.includes('darkvoid')){
-			this.fastPopSafe(movePool, movePool.indexOf('darkvoid'));
+		if (
+			(!abilities.includes("Grassy Surge") ||
+				!abilities.includes("Seed Sower")) &&
+			movePool.includes("grassyslide")
+		) {
+			this.fastPopSafe(movePool, movePool.indexOf("waterpulse"));
 		}
 
-		if(baseStats.def<80 && movePool.includes('bodypress')){
-			this.fastPopSafe(movePool, movePool.indexOf('bodypress'));
-		}
-		if(!movePool.includes('bodypress')){
-			this.fastPopSafe(movePool, movePool.indexOf('irondefense'));
-		}
-		if(movePool.includes('dynamicpunch') && !abilities.includes('No Guard')){
-			this.fastPopSafe(movePool, movePool.indexOf('dynamicpunch'));
+		if (
+			!abilities.includes("Mega Launcher") &&
+			movePool.includes("waterpulse")
+		) {
+			this.fastPopSafe(movePool, movePool.indexOf("waterpulse"));
 		}
 
-		if(!abilities.includes('Quick Feet') && !abilities.includes('Toxic Boost') && !abilities.includes('Guts') && movePool.includes('facade')){
-			this.fastPopSafe(movePool, movePool.indexOf('facade'));
+		if (species.baseSpecies !== "Morpeko" && movePool.includes("aurawheel")) {
+			this.fastPopSafe(movePool, movePool.indexOf("aurawheel"));
 		}
 
-		if (moves.size==3 && movePool.includes('storedpower')) {
-			this.fastPopSafe(movePool, movePool.indexOf('storedpower'));
+		if (species.baseSpecies !== "Darkrai" && movePool.includes("darkvoid")) {
+			this.fastPopSafe(movePool, movePool.indexOf("darkvoid"));
 		}
 
-		let shouldRemove:((move: Move) => boolean)|null=null;
+		if (baseStats.def < 80 && movePool.includes("bodypress")) {
+			this.fastPopSafe(movePool, movePool.indexOf("bodypress"));
+		}
+
+		if (!movePool.includes("bodypress")) {
+			this.fastPopSafe(movePool, movePool.indexOf("irondefense"));
+			this.fastPopSafe(movePool, movePool.indexOf("acidarmor"));
+		}
+
+		if (
+			movePool.includes("dynamicpunch") &&
+			!abilities.includes("No Guard")
+		) {
+			this.fastPopSafe(movePool, movePool.indexOf("dynamicpunch"));
+		}
+
+		if (
+			!abilities.includes("Quick Feet") &&
+			!abilities.includes("Toxic Boost") &&
+			!abilities.includes("Guts") &&
+			movePool.includes("facade")
+		) {
+			this.fastPopSafe(movePool, movePool.indexOf("facade"));
+		}
+
+		if (moves.size == 3 && movePool.includes("storedpower")) {
+			this.fastPopSafe(movePool, movePool.indexOf("storedpower"));
+		}
+
+		let shouldRemove: ((move: Move) => boolean)[] = [];
 		if (baseStats.atk < 65 && baseStats.spa < 65) {
 			// Слабый атакующий: оставляем только статус и атаки без зависимости от Atk/SpA
-			shouldRemove = move => (move.category !== 'Status' && !this.isStatIndependentAttack(move)) || PHYSICAL_SETUP.includes(move.id) || SPECIAL_SETUP.includes(move.id);
-		} else if (physGap > 50 || counter.get('physicalsetup')) {
+			shouldRemove.push(
+				(move) =>
+					(move.category !== "Status" &&
+						!this.isStatIndependentAttack(move)) ||
+					PHYSICAL_SETUP.includes(move.id) ||
+					SPECIAL_SETUP.includes(move.id),
+			);
+		} else if (physGap > 50 || counter.get("physicalsetup")) {
 			// Явно физический: убираем спецатаки
-			shouldRemove = move => (move.category === 'Special' && !this.isStatIndependentAttack(move)) || SPECIAL_SETUP.includes(move.id);
-		} else if (-physGap > 50  || counter.get('specialsetup')) {
+			shouldRemove.push(
+				(move) =>
+					(move.category === "Special" &&
+						!this.isStatIndependentAttack(move)) ||
+					SPECIAL_SETUP.includes(move.id),
+			);
+		} else if (-physGap > 50 || counter.get("specialsetup")) {
 			// Явно специальный: убираем физические (Body Press и Foul Play остаются)
-			shouldRemove = move => move.category === 'Physical' && !this.isStatIndependentAttack(move) || PHYSICAL_SETUP.includes(move.id);
+			shouldRemove.push(
+				(move) =>
+					(move.category === "Physical" &&
+						!this.isStatIndependentAttack(move)) ||
+					PHYSICAL_SETUP.includes(move.id),
+			);
 		}
-		
-		if(shouldRemove){
+
+		if (
+			!abilities.includes("Galvanize") &&
+			!abilities.includes("Aerilate") &&
+			!abilities.includes("Pixilate")
+		) {
+			const hasSereneGrace = abilities.includes("Serene Grace");
+			const hasVoiceAbility =
+				abilities.includes("Liquid Voice") ||
+				abilities.includes("Punk Rock");
+			shouldRemove.push(
+				(move) =>
+					move.type == "Normal" &&
+					!this.isStatIndependentAttack(move) &&
+					!(move.flags.sound && hasVoiceAbility) &&
+					!(move.secondary && hasSereneGrace) &&
+					move.basePower < 120 &&
+					!NORMAL_MOVES_WHITE_LIST.has(move.id),
+			);
+		}
+
+		for (let m of moves) {
+			const usedMove = this.dex.moves.get(m);
+			if (
+				usedMove.category != "Status" &&
+				!this.isStatIndependentAttack(usedMove)
+			) {
+				shouldRemove.push(
+					(move) =>
+						move.category != "Status" &&
+						!this.isStatIndependentAttack(move) &&
+						usedMove.type == move.type &&
+						((usedMove.priority == move.priority &&
+							usedMove.priority >= 0) ||
+							(usedMove.priority < 0 && move.priority == 0)),
+				);
+			}
+		}
+
+		if (shouldRemove) {
 			for (let i = movePool.length - 1; i >= 0; i--) {
 				if (movePool.length <= this.maxMoveCount) break;
 				const move = this.dex.moves.get(movePool[i]);
-				if (shouldRemove(move)) this.fastPopSafe(movePool, i);
+				for (let filter of shouldRemove) {
+					if (filter(move)) this.fastPopSafe(movePool, i);
+				}
 			}
 		}
 		const NEW_MOVE_PAIRS = this.getMovePairs(abilities);
@@ -1121,7 +1280,7 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 				this.fastPopSafe(movePool, movePool.indexOf(unpairedMoves[0]));
 			}
 		}
-		
+
 		// These moves are paired, and shouldn't appear if there is not room for them both.
 		if (moves.size === this.maxMoveCount - 1) {
 			for (const pair of NEW_MOVE_PAIRS) {
@@ -1787,8 +1946,6 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 			}
 		}
 
-		
-
 		// Enforce STAB
 		for (const type of types) {
 			// Check if a STAB move of that type should be required
@@ -1908,10 +2065,8 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 			}
 		}
 
-		if(moves.has('storedpower') && !counter.get('setup')){
-			const setupMoves = movePool.filter((moveid) =>
-					SETUP.includes(moveid),
-				);
+		if (moves.has("storedpower") && !counter.get("setup")) {
+			const setupMoves = movePool.filter((moveid) => SETUP.includes(moveid));
 			if (setupMoves.length) {
 				const moveid = this.sample(setupMoves);
 				counter = this.addFusionMove(
@@ -1929,7 +2084,7 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 					isDoubles,
 				);
 			} else {
-				moves.delete('storedpower')
+				moves.delete("storedpower");
 			}
 		}
 
@@ -1981,8 +2136,6 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 			}
 		}
 
-		
-		
 		// Enforce redirecting moves and Fake Out on Doubles Support
 		if (role === "Doubles Support") {
 			for (const moveid of ["fakeout", "followme", "ragepowder"]) {
@@ -2055,11 +2208,7 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 			const attackingMoves = [];
 			for (const moveid of movePool) {
 				const move = this.dex.moves.get(moveid);
-				if (
-					(!this.noStab.includes(moveid) &&
-					move.category !== "Status") ||
-					(!this.noStab.includes(moveid) && move.category !== "Status" && move.type != "Normal" && !abilities.includes('Galvanize') && !abilities.includes('Pixilate') && !abilities.includes('Aerilate'))
-				)
+				if (!this.noStab.includes(moveid) && move.category !== "Status")
 					attackingMoves.push(moveid);
 			}
 			if (attackingMoves.length) {
@@ -2417,157 +2566,186 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 		)
 			return "Heavy-Duty Boots";
 	}
-	isStatIndependentAttack(move:Move) {
-		if (move.category === 'Status') return false;
+	isStatIndependentAttack(move: Move) {
+		if (move.category === "Status") return false;
 		return (
 			STAT_INDEPENDENT_MOVES.has(move.id) ||
-			move.damage !== undefined ||                  // damage: 40 / 'level'
-			typeof move.damageCallback === 'function' ||   // Super Fang, Endeavor, Ruination...
+			move.damage !== undefined || // damage: 40 / 'level'
+			typeof move.damageCallback === "function" || // Super Fang, Endeavor, Ruination...
 			!!move.ohko ||
-			move.overrideOffensivePokemon === 'target' ||  // Foul Play
-			move.overrideOffensiveStat === 'def' ||        // Body Press
-			move.overrideOffensiveStat === 'spd'
+			move.overrideOffensivePokemon === "target" || // Foul Play
+			move.overrideOffensiveStat === "def" || // Body Press
+			move.overrideOffensiveStat === "spd"
 		);
 	}
 
 	shouldCullFusionAbility(
-			ability: string,
-			types: Set<string>,
-			moves: Set<string>,
-			abilities: string[],
-			counter: MoveCounter,
-			teamDetails: RandomTeamsTypes.TeamDetails,
-			species: Species,
-			species2: Species,
-			role: RandomTeamsTypes.Role,
-			isLead: boolean,
-			isDoubles: boolean,
-		): boolean {
-			switch (ability) {
+		ability: string,
+		types: Set<string>,
+		moves: Set<string>,
+		abilities: string[],
+		counter: MoveCounter,
+		teamDetails: RandomTeamsTypes.TeamDetails,
+		species: Species,
+		species2: Species,
+		role: RandomTeamsTypes.Role,
+		isLead: boolean,
+		isDoubles: boolean,
+	): boolean {
+		switch (ability) {
 			// Abilities which are primarily useful for certain moves or with team support
-			case 'Chlorophyll': case 'Solar Power':
+			case "Chlorophyll":
+			case "Solar Power":
 				return !teamDetails.sun;
-			case 'Defiant':
-				return (species.id === 'thundurus' && !!counter.get('Status'));
-			case 'Hydration': case 'Swift Swim':
+			case "Defiant":
+				return species.id === "thundurus" && !!counter.get("Status");
+			case "Hydration":
+			case "Swift Swim":
 				return !teamDetails.rain;
-			case 'Iron Fist': case 'Skill Link':
+			case "Iron Fist":
+			case "Skill Link":
 				return !counter.get(toID(ability));
-			case 'Overgrow':
-				return !counter.get('Grass');
-			case 'Prankster':
-				return !counter.get('Status');
-			case 'Sand Force': case 'Sand Rush':
+			case "Overgrow":
+				return !counter.get("Grass");
+			case "Prankster":
+				return !counter.get("Status");
+			case "Sand Force":
+			case "Sand Rush":
 				return !teamDetails.sand;
-			case 'Slush Rush':
+			case "Slush Rush":
 				return !teamDetails.snow;
-			case 'Swarm':
-				return !counter.get('Bug');
-			case 'Torrent':
-				return (!counter.get('Water') && !moves.has('flipturn'));
-			case 'Multitype':
-				return species.baseSpecies !== 'Arceus' && species2.baseSpecies !== 'Arceus';
-			case 'RKS System':
-				return species.baseSpecies !== 'Silvally' && species2.baseSpecies !== 'Silvally';
-			case 'Huge Power':
-			case 'Pure Power':
-			case 'Guts':
-			case 'Toxic Boost':
-				return !counter.get('physical');
-			case 'Hunger Switch':
-				return species.baseSpecies != 'Morpeko'
-			case 'Shields Down':
-				return species.baseSpecies != 'Minior'
-			case 'Disguise':
-				return species.baseSpecies != 'Mimikyu'
-			case 'Gulp Missile':
-				return species.baseSpecies != 'Cramorant' || !moves.has('Surf')
-			case 'Zero to Hero':
-				return species.baseSpecies != 'Palafin'
-			case 'Ice Face':
-				return species.baseSpecies != 'Eiscue'
-			case 'Mega Launcher':
-				return !counter.get('pulse');
-			}
-	
-			return false;
+			case "Swarm":
+				return !counter.get("Bug");
+			case "Torrent":
+				return !counter.get("Water") && !moves.has("flipturn");
+			case "Multitype":
+				return (
+					species.baseSpecies !== "Arceus" &&
+					species2.baseSpecies !== "Arceus"
+				);
+			case "RKS System":
+				return (
+					species.baseSpecies !== "Silvally" &&
+					species2.baseSpecies !== "Silvally"
+				);
+			case "Huge Power":
+			case "Pure Power":
+			case "Guts":
+			case "Toxic Boost":
+				return !counter.get("physical");
+			case "Hunger Switch":
+				return species.baseSpecies != "Morpeko";
+			case "Shields Down":
+				return species.baseSpecies != "Minior";
+			case "Disguise":
+				return species.baseSpecies != "Mimikyu";
+			case "Gulp Missile":
+				return species.baseSpecies != "Cramorant" || !moves.has("Surf");
+			case "Zero to Hero":
+				return species.baseSpecies != "Palafin";
+			case "Ice Face":
+				return species.baseSpecies != "Eiscue";
+			case "Mega Launcher":
+				return !counter.get("pulse");
 		}
+
+		return false;
+	}
 	override queryMoves(
-			moves: Set<string> | null,
-			species: Species,
-			teraType: string,
-			abilities: string[],
-		): MoveCounter {
-			// This is primarily a helper function for random setbuilder functions.
-			const counter = new MoveCounter();
-			const types = new Set(species.types);
-			if (!moves?.size) return counter;
-	
-			const categories = { Physical: 0, Special: 0, Status: 0 };
-	
-			// Iterate through all moves we've chosen so far and keep track of what they do:
-			for (const moveid of moves) {
-				let move = this.dex.moves.get(moveid);
-				// Nature Power calls Earthquake in Gen 5 and Tri Attack in Gens 6-9
-				if (this.gen === 5 && moveid === 'naturepower') move = this.dex.moves.get('earthquake');
-				if (this.gen > 5 && moveid === 'naturepower') move = this.dex.moves.get('triattack');
-	
-				const moveType = this.getMoveType(move, species, abilities, teraType);
-				if (move.damage || move.damageCallback) {
-					// Moves that do a set amount of damage:
-					counter.add('damage');
-					counter.damagingMoves.add(move);
-				} else {
-					// Are Physical/Special/Status moves:
-					categories[move.category]++;
-				}
-				// Moves that have a low base power:
-				if (moveid === 'lowkick' || (move.basePower && move.basePower <= 60 && !['nuzzle', 'rapidspin'].includes(moveid))) {
-					counter.add('technician');
-				}
-				// Moves that hit up to 5 times:
-				if (move.multihit && Array.isArray(move.multihit) && move.multihit[1] === 5) counter.add('skilllink');
-				if (move.recoil || move.hasCrashDamage) counter.add('recoil');
-				if (move.drain) counter.add('drain');
-				if (move.flags.pulse) counter.add('pulse');
-				// Moves which have a base power:
-				if (move.basePower || move.basePowerCallback) {
-					counter.basePowerMoves.add(move);
-					if (!this.noStab.includes(moveid) || this.priorityPokemon.includes(species.id) && move.priority > 0) {
-						counter.add(moveType);
-						if (types.has(moveType)) counter.add('stab');
-						if (teraType === moveType) counter.add('stabtera');
-						counter.damagingMoves.add(move);
-					}
-					if (move.flags['bite']) counter.add('strongjaw');
-					if (move.flags['punch']) counter.add('ironfist');
-					if (move.flags['sound']) counter.add('sound');
-					if (move.priority > 0 || (moveid === 'grassyglide' && abilities.includes('Grassy Surge'))) {
-						counter.add('priority');
-					}
-				}
-				// Moves with secondary effects:
-				if (move.secondary || move.hasSheerForceBoost) {
-					counter.add('sheerforce');
-				}
-				// Moves with low accuracy:
-				if (move.accuracy && move.accuracy !== true && move.accuracy < 90) counter.add('inaccurate');
-	
-				// Moves that change stats:
-				if (RECOVERY_MOVES.includes(moveid)) counter.add('recovery');
-				if (CONTRARY_MOVES.includes(moveid)) counter.add('contrary');
-				if (PHYSICAL_SETUP.includes(moveid)) counter.add('physicalsetup');
-				if (SPECIAL_SETUP.includes(moveid)) counter.add('specialsetup');
-				if (MIXED_SETUP.includes(moveid)) counter.add('mixedsetup');
-				if (SPEED_SETUP.includes(moveid)) counter.add('speedsetup');
-				if (SPEED_CONTROL.includes(moveid)) counter.add('speedcontrol');
-				if (SETUP.includes(moveid)) counter.add('setup');
-				if (HAZARDS.includes(moveid)) counter.add('hazards');
+		moves: Set<string> | null,
+		species: Species,
+		teraType: string,
+		abilities: string[],
+	): MoveCounter {
+		// This is primarily a helper function for random setbuilder functions.
+		const counter = new MoveCounter();
+		const types = new Set(species.types);
+		if (!moves?.size) return counter;
+
+		const categories = { Physical: 0, Special: 0, Status: 0 };
+
+		// Iterate through all moves we've chosen so far and keep track of what they do:
+		for (const moveid of moves) {
+			let move = this.dex.moves.get(moveid);
+			// Nature Power calls Earthquake in Gen 5 and Tri Attack in Gens 6-9
+			if (this.gen === 5 && moveid === "naturepower")
+				move = this.dex.moves.get("earthquake");
+			if (this.gen > 5 && moveid === "naturepower")
+				move = this.dex.moves.get("triattack");
+
+			const moveType = this.getMoveType(move, species, abilities, teraType);
+			if (move.damage || move.damageCallback) {
+				// Moves that do a set amount of damage:
+				counter.add("damage");
+				counter.damagingMoves.add(move);
+			} else {
+				// Are Physical/Special/Status moves:
+				categories[move.category]++;
 			}
-	
-			counter.set('Physical', Math.floor(categories['Physical']));
-			counter.set('Special', Math.floor(categories['Special']));
-			counter.set('Status', categories['Status']);
-			return counter;
+			// Moves that have a low base power:
+			if (
+				moveid === "lowkick" ||
+				(move.basePower &&
+					move.basePower <= 60 &&
+					!["nuzzle", "rapidspin"].includes(moveid))
+			) {
+				counter.add("technician");
+			}
+			// Moves that hit up to 5 times:
+			if (
+				move.multihit &&
+				Array.isArray(move.multihit) &&
+				move.multihit[1] === 5
+			)
+				counter.add("skilllink");
+			if (move.recoil || move.hasCrashDamage) counter.add("recoil");
+			if (move.drain) counter.add("drain");
+			if (move.flags.pulse) counter.add("pulse");
+			// Moves which have a base power:
+			if (move.basePower || move.basePowerCallback) {
+				counter.basePowerMoves.add(move);
+				if (
+					!this.noStab.includes(moveid) ||
+					(this.priorityPokemon.includes(species.id) && move.priority > 0)
+				) {
+					counter.add(moveType);
+					if (types.has(moveType)) counter.add("stab");
+					if (teraType === moveType) counter.add("stabtera");
+					counter.damagingMoves.add(move);
+				}
+				if (move.flags["bite"]) counter.add("strongjaw");
+				if (move.flags["punch"]) counter.add("ironfist");
+				if (move.flags["sound"]) counter.add("sound");
+				if (
+					move.priority > 0 ||
+					(moveid === "grassyglide" && abilities.includes("Grassy Surge"))
+				) {
+					counter.add("priority");
+				}
+			}
+			// Moves with secondary effects:
+			if (move.secondary || move.hasSheerForceBoost) {
+				counter.add("sheerforce");
+			}
+			// Moves with low accuracy:
+			if (move.accuracy && move.accuracy !== true && move.accuracy < 90)
+				counter.add("inaccurate");
+
+			// Moves that change stats:
+			if (RECOVERY_MOVES.includes(moveid)) counter.add("recovery");
+			if (CONTRARY_MOVES.includes(moveid)) counter.add("contrary");
+			if (PHYSICAL_SETUP.includes(moveid)) counter.add("physicalsetup");
+			if (SPECIAL_SETUP.includes(moveid)) counter.add("specialsetup");
+			if (MIXED_SETUP.includes(moveid)) counter.add("mixedsetup");
+			if (SPEED_SETUP.includes(moveid)) counter.add("speedsetup");
+			if (SPEED_CONTROL.includes(moveid)) counter.add("speedcontrol");
+			if (SETUP.includes(moveid)) counter.add("setup");
+			if (HAZARDS.includes(moveid)) counter.add("hazards");
 		}
+
+		counter.set("Physical", Math.floor(categories["Physical"]));
+		counter.set("Special", Math.floor(categories["Special"]));
+		counter.set("Status", categories["Status"]);
+		return counter;
+	}
 }
