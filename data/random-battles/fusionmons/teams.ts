@@ -1179,12 +1179,7 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 			this.fastPopSafe(movePool, movePool.indexOf("dynamicpunch"));
 		}
 
-		if (
-			!abilities.includes("Quick Feet") &&
-			!abilities.includes("Toxic Boost") &&
-			!abilities.includes("Guts") &&
-			movePool.includes("facade")
-		) {
+		if (movePool.includes("facade")) {
 			this.fastPopSafe(movePool, movePool.indexOf("facade"));
 		}
 
@@ -1195,14 +1190,24 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 		let shouldRemove: ((move: Move) => boolean)[] = [];
 		if (baseStats.atk < 65 && baseStats.spa < 65) {
 			// Слабый атакующий: оставляем только статус и атаки без зависимости от Atk/SpA
-			shouldRemove.push(
-				(move) =>
-					(move.category !== "Status" &&
-						!this.isStatIndependentAttack(move)) ||
-					PHYSICAL_SETUP.includes(move.id) ||
-					SPECIAL_SETUP.includes(move.id),
-			);
-		} else if (physGap > 50 || counter.get("physicalsetup")) {
+			if (
+				movePool.some((m) =>
+					this.isStatIndependentAttack(this.dex.moves.get(m)),
+				)
+			) {
+				shouldRemove.push(
+					(move) =>
+						(move.category !== "Status" &&
+							!this.isStatIndependentAttack(move)) ||
+						PHYSICAL_SETUP.includes(move.id) ||
+						SPECIAL_SETUP.includes(move.id),
+				);
+			}
+		} else if (
+			physGap > 50 ||
+			counter.get("physicalsetup") ||
+			baseStats.spa < 65
+		) {
 			// Явно физический: убираем спецатаки
 			shouldRemove.push(
 				(move) =>
@@ -1210,7 +1215,11 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 						!this.isStatIndependentAttack(move)) ||
 					SPECIAL_SETUP.includes(move.id),
 			);
-		} else if (-physGap > 50 || counter.get("specialsetup")) {
+		} else if (
+			-physGap > 50 ||
+			counter.get("specialsetup") ||
+			baseStats.atk < 65
+		) {
 			// Явно специальный: убираем физические (Body Press и Foul Play остаются)
 			shouldRemove.push(
 				(move) =>
@@ -1226,6 +1235,10 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 			!abilities.includes("Pixilate")
 		) {
 			const hasSereneGrace = abilities.includes("Serene Grace");
+			const hasStatusAbility =
+				!abilities.includes("Quick Feet") &&
+				!abilities.includes("Toxic Boost") &&
+				!abilities.includes("Guts");
 			const hasVoiceAbility =
 				abilities.includes("Liquid Voice") ||
 				abilities.includes("Punk Rock");
@@ -1236,7 +1249,16 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 					!(move.flags.sound && hasVoiceAbility) &&
 					!(move.secondary && hasSereneGrace) &&
 					move.basePower < 120 &&
-					!NORMAL_MOVES_WHITE_LIST.has(move.id),
+					!NORMAL_MOVES_WHITE_LIST.has(move.id) &&
+					!(hasStatusAbility && move.id === "facade"),
+			);
+		}
+
+		const hasSetupMoves = SETUP.some((v)=>moves.has(v))
+		if(hasSetupMoves){
+			shouldRemove.push(
+				(move) =>
+					SETUP.includes(move.id)
 			);
 		}
 
