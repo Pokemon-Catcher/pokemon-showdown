@@ -1093,9 +1093,6 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 
 	getMovePairs(abilities: string[]) {
 		const NEW_MOVE_PAIRS = [...MOVE_PAIRS];
-		if (!abilities.includes("Drought")) {
-			NEW_MOVE_PAIRS.push(["solarbeam", "sunnyday"]);
-		}
 
 		return NEW_MOVE_PAIRS;
 	}
@@ -1123,6 +1120,15 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 			this.fastPopSafe(movePool, movePool.indexOf("curse"));
 		}
 
+		if(!abilities.includes("Drought")){
+			this.fastPopSafe(movePool, movePool.indexOf("solarbeam"));
+		}
+		if(!abilities.includes("Drizzle") && !abilities.includes("Compound Eyes")){
+			this.fastPopSafe(movePool, movePool.indexOf("thunder"));
+		}
+		if(!abilities.includes("Snow Warning") && !abilities.includes("Compound Eyes")){
+			this.fastPopSafe(movePool, movePool.indexOf("blizzard"));
+		}
 		if (
 			!abilities.includes("Drizzle") &&
 			!abilities.includes("Drought") &&
@@ -1145,7 +1151,7 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 				!abilities.includes("Seed Sower")) &&
 			movePool.includes("grassyslide")
 		) {
-			this.fastPopSafe(movePool, movePool.indexOf("waterpulse"));
+			this.fastPopSafe(movePool, movePool.indexOf("grassyslide"));
 		}
 
 		if (
@@ -1179,11 +1185,7 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 			this.fastPopSafe(movePool, movePool.indexOf("dynamicpunch"));
 		}
 
-		if (movePool.includes("facade")) {
-			this.fastPopSafe(movePool, movePool.indexOf("facade"));
-		}
-
-		if (moves.size == 3 && movePool.includes("storedpower")) {
+		if (moves.size == 3 && movePool.includes("storedpower") && !SETUP.some((v)=>moves.has(v))) {
 			this.fastPopSafe(movePool, movePool.indexOf("storedpower"));
 		}
 
@@ -1226,6 +1228,20 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 					(move.category === "Physical" &&
 						!this.isStatIndependentAttack(move)) ||
 					PHYSICAL_SETUP.includes(move.id),
+			);
+		}
+
+		// Remove low accuracy moves if there are more safe options
+		if (
+			!abilities.includes("No Guard") &&
+			!abilities.includes("Compound Eyes")
+		) {
+			shouldRemove.push(
+				(move) =>
+					move.category !== 'Status' && (move.accuracy !== true && move.accuracy < 80 && movePool.some((m)=>{
+						const d = this.dex.moves.get(m)
+						return (d.accuracy === true || Number(move.accuracy)<d.accuracy) && d.basePower>=90 && move.category == d.category && move.type == d.type
+					}))
 			);
 		}
 
@@ -1280,7 +1296,7 @@ export default class RandomFusionmonsTeams extends RandomTeams {
 			}
 		}
 
-		if (shouldRemove) {
+		if (shouldRemove.length) {
 			for (let i = movePool.length - 1; i >= 0; i--) {
 				if (movePool.length <= this.maxMoveCount) break;
 				const move = this.dex.moves.get(movePool[i]);
